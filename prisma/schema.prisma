@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Dusun {
+  id    String @id @default(cuid())
+  nama  String
+  umkms Umkm[]
+}
+
+model Umkm {
+  id             String       @id @default(cuid())
+  nama           String
+  pemilik        String
+  kategori       String
+  deskripsi      String
+  alamat         String
+  mapsUrl        String?
+  jamOperasional String
+  whatsapp       String
+  fotoUtama      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  dusunId        String
+  dusun          Dusun        @relation(fields: [dusunId], references: [id], onDelete: Cascade)
+  fotoProduk     FotoProduk[]
+}
+
+model FotoProduk {
+  id     String @id @default(cuid())
+  url    String
+  umkmId String
+  umkm   Umkm   @relation(fields: [umkmId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,306 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { toast } from "sonner";
+import { Store, Loader2 } from "lucide-react";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import ImageUploader from "@/components/ImageUploader";
+
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const formSchema = z.object({
+  nama: z.string().min(2, "Nama UMKM minimal 2 karakter."),
+  pemilik: z.string().min(2, "Nama pemilik minimal 2 karakter."),
+  kategori: z.string().min(1, "Kategori wajib dipilih."),
+  dusunId: z.string().min(1, "Dusun wajib dipilih."),
+  deskripsi: z.string().min(10, "Deskripsi minimal 10 karakter."),
+  alamat: z.string().min(5, "Alamat wajib diisi dengan jelas."),
+  mapsUrl: z.string().url("Link Google Maps tidak valid.").optional().or(z.literal("")),
+  jamOperasional: z.string().min(3, "Contoh: 08:00 - 20:00"),
+  whatsapp: z.string().regex(/^[0-9]+$/, "Nomor WhatsApp hanya boleh berisi angka.").min(9, "Nomor WA tidak valid"),
+  fotoUtama: z.string().min(1, "Foto Utama wajib diunggah."),
+  fotoProduk: z.array(z.string()).optional(),
+});
+
+const KATEGORI = ["Makanan", "Minuman", "Kerajinan", "Jasa", "Pertanian", "Peternakan"];
+
+export default function DaftarPage() {
+  const router = useRouter();
+  const [dusuns, setDusuns] = useState<{id: string, nama: string}[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/dusun")
+      .then(res => res.json())
+      .then(data => setDusuns(data))
+      .catch(console.error);
+  }, []);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      nama: "",
+      pemilik: "",
+      kategori: "",
+      dusunId: "",
+      deskripsi: "",
+      alamat: "",
+      mapsUrl: "",
+      jamOperasional: "",
+      whatsapp: "",
+      fotoUtama: "",
+      fotoProduk: [],
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/umkm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+
+      if (!res.ok) throw new Error("Gagal mendaftar");
+      
+      toast.success("UMKM berhasil didaftarkan.", {
+        description: "Data usaha Anda kini dapat dilihat oleh masyarakat luas."
+      });
+      router.push("/");
+    } catch (error) {
+      toast.error("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <>
+      <Navbar />
+      <main className="flex-grow bg-secondary/10 py-12">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="bg-white rounded-3xl shadow-sm border p-6 md:p-10">
+            <div className="flex items-center gap-4 mb-8 pb-6 border-b border-border/50">
+              <div className="bg-primary/10 p-3 rounded-2xl text-primary">
+                <Store className="w-8 h-8" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Daftarkan UMKM Anda</h1>
+                <p className="text-muted-foreground mt-1">Lengkapi form berikut untuk mempromosikan usaha Anda.</p>
+              </div>
+            </div>
+
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="nama"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nama UMKM</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Contoh: Kripik Pisang Mpok Nur" className="h-12 rounded-xl" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="pemilik"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nama Pemilik</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nama Lengkap" className="h-12 rounded-xl" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="kategori"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Kategori</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-12 rounded-xl">
+                              <SelectValue placeholder="Pilih Kategori" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {KATEGORI.map(cat => (
+                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="dusunId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Lokasi Dusun</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-12 rounded-xl">
+                              <SelectValue placeholder="Pilih Dusun" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {dusuns.map(d => (
+                              <SelectItem key={d.id} value={d.id}>{d.nama}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="alamat"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Alamat Lengkap</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Jl. Raya Desa No. 123, RT 01/RW 02..." className="resize-none rounded-xl" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="mapsUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Link Google Maps (opsional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://maps.app.goo.gl/..." className="rounded-xl" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="deskripsi"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Deskripsi Usaha & Produk</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Jelaskan tentang usaha dan produk yang dijual..." className="min-h-[120px] rounded-xl" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="jamOperasional"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Jam Operasional</FormLabel>
+                        <FormControl>
+                          <Input placeholder="08:00 - 17:00 (Senin - Sabtu)" className="h-12 rounded-xl" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="whatsapp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nomor WhatsApp (Hanya Angka)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="081234567890" className="h-12 rounded-xl" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-border/50 space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="fotoUtama"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <ImageUploader 
+                            label="Foto Utama UMKM (Wajib)" 
+                            maxFiles={1} 
+                            onUploadSuccess={(urls) => field.onChange(urls[0])} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="fotoProduk"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <ImageUploader 
+                            label="Galeri Produk (Maks 5 Foto)" 
+                            maxFiles={5} 
+                            onUploadSuccess={(urls) => field.onChange(urls)} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="pt-6">
+                  <Button type="submit" disabled={isSubmitting} className="w-full h-14 text-lg rounded-xl shadow-md shadow-primary/20">
+                    {isSubmitting ? (
+                      <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Memproses...</>
+                    ) : (
+                      "Daftarkan UMKM"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
