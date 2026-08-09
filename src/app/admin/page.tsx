@@ -20,6 +20,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
   
   const [umkms, setUmkms] = useState<any[]>([]);
   const [dusuns, setDusuns] = useState<any[]>([]);
@@ -32,16 +33,27 @@ export default function AdminPage() {
   const [umkmForm, setUmkmForm] = useState({ nama: "", pemilik: "", kategori: "", dusunId: "", alamat: "", mapsUrl: "", whatsapp: "" });
   const [savingUmkm, setSavingUmkm] = useState(false);
 
-  // Very simple auth (in real world use next-auth or JWT)
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Using environment variables if possible, but fallback for demo
-    if (username === "admin" && password === "admin123") {
-      setIsAuthenticated(true);
-      fetchData();
-      toast.success("Login berhasil");
-    } else {
-      toast.error("Username atau password salah");
+    setLoggingIn(true);
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      if (res.ok) {
+        setIsAuthenticated(true);
+        fetchData();
+        toast.success("Login berhasil");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Username atau password salah");
+      }
+    } catch (error) {
+      toast.error("Terjadi kesalahan, coba lagi");
+    } finally {
+      setLoggingIn(false);
     }
   };
 
@@ -195,7 +207,9 @@ export default function AdminPage() {
               onChange={e => setPassword(e.target.value)} 
               className="h-12 rounded-xl"
             />
-            <Button type="submit" className="w-full h-12 rounded-xl text-lg">Login</Button>
+            <Button type="submit" disabled={loggingIn} className="w-full h-12 rounded-xl text-lg">
+              {loggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : "Login"}
+            </Button>
           </form>
         </div>
       </div>
