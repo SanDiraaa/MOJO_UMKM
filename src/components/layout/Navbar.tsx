@@ -15,7 +15,7 @@ export default function Navbar() {
           <div className="bg-primary p-2 rounded-xl group-hover:bg-primary/90 transition-colors">
             <Store className="h-5 w-5 text-white" />
           </div>
-          <span className="font-bold text-xl text-foreground tracking-tight">UMKM <span className="text-primary">MOJOLEBAK</span></span>
+          <span className="font-bold text-xl text-foreground tracking-tight">UMKM <span className="text-primary">Desa</span></span>
         </Link>
         
         <div className="hidden md:flex items-center gap-6">

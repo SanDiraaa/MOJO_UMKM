@@ -42,7 +42,12 @@ Website pendataan UMKM per dusun, dibangun dengan Next.js, Prisma, dan PostgreSQ
    - `ADMIN_USER` — username login admin
    - `ADMIN_PASS` — password login admin
 4. Klik **Deploy**.
-5. Setelah deploy pertama selesai, jalankan migrasi database ke production sekali dari komputer kamu (arahkan `DATABASE_URL` di `.env` lokal ke database production, lalu jalankan):
+5. **Setup upload foto (WAJIB agar foto UMKM tersimpan permanen):**
+   - Buka project kamu di dashboard Vercel > tab **Storage** > **Create Database** > pilih **Blob**.
+   - Ikuti langkah pembuatan, lalu hubungkan (connect) Blob Storage itu ke project kamu.
+   - Vercel otomatis menambahkan environment variable `BLOB_READ_WRITE_TOKEN` ke project — tidak perlu isi manual.
+   - Redeploy project (Deployments > titik tiga > Redeploy) supaya environment variable baru terbaca.
+6. Setelah deploy pertama selesai, jalankan migrasi database ke production sekali dari komputer kamu (arahkan `DATABASE_URL` di `.env` lokal ke database production, lalu jalankan):
    ```bash
    npx prisma migrate deploy
    npx prisma db seed
@@ -53,5 +58,6 @@ Website pendataan UMKM per dusun, dibangun dengan Next.js, Prisma, dan PostgreSQ
 
 - [Next.js](https://nextjs.org)
 - [Prisma ORM](https://www.prisma.io) + PostgreSQL
+- [Vercel Blob](https://vercel.com/storage/blob) — penyimpanan foto UMKM
 - [Tailwind CSS](https://tailwindcss.com)
 - [shadcn/ui](https://ui.shadcn.com)
