@@ -29,7 +29,7 @@ export default function AdminPage() {
   const [savingDusun, setSavingDusun] = useState(false);
 
   const [editingUmkm, setEditingUmkm] = useState<any | null>(null);
-  const [umkmForm, setUmkmForm] = useState({ nama: "", pemilik: "", kategori: "", dusunId: "", alamat: "", mapsUrl: "" });
+  const [umkmForm, setUmkmForm] = useState({ nama: "", pemilik: "", kategori: "", dusunId: "", alamat: "", mapsUrl: "", whatsapp: "" });
   const [savingUmkm, setSavingUmkm] = useState(false);
 
   // Very simple auth (in real world use next-auth or JWT)
@@ -127,18 +127,23 @@ export default function AdminPage() {
       dusunId: umkm.dusunId || umkm.dusun?.id || "",
       alamat: umkm.alamat || "",
       mapsUrl: umkm.mapsUrl || "",
+      whatsapp: umkm.whatsapp || "",
     });
   };
 
   const closeEditUmkm = () => {
     setEditingUmkm(null);
-    setUmkmForm({ nama: "", pemilik: "", kategori: "", dusunId: "", alamat: "", mapsUrl: "" });
+    setUmkmForm({ nama: "", pemilik: "", kategori: "", dusunId: "", alamat: "", mapsUrl: "", whatsapp: "" });
   };
 
   const saveUmkm = async () => {
     if (!editingUmkm) return;
     if (!umkmForm.nama.trim() || !umkmForm.pemilik.trim() || !umkmForm.kategori || !umkmForm.dusunId) {
       toast.error("Semua field wajib diisi");
+      return;
+    }
+    if (umkmForm.whatsapp && !/^[0-9]+$/.test(umkmForm.whatsapp)) {
+      toast.error("Nomor WhatsApp hanya boleh berisi angka");
       return;
     }
     setSavingUmkm(true);
@@ -192,6 +197,7 @@ export default function AdminPage() {
             />
             <Button type="submit" className="w-full h-12 rounded-xl text-lg">Login</Button>
           </form>
+          <p className="text-center text-sm text-muted-foreground mt-6">Hint: admin / admin123</p>
         </div>
       </div>
     );
@@ -450,6 +456,18 @@ export default function AdminPage() {
                   id="umkm-pemilik"
                   value={umkmForm.pemilik}
                   onChange={e => setUmkmForm({ ...umkmForm, pemilik: e.target.value })}
+                  className="rounded-lg"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="umkm-whatsapp">Nomor WhatsApp</Label>
+                <Input
+                  id="umkm-whatsapp"
+                  value={umkmForm.whatsapp}
+                  onChange={e => setUmkmForm({ ...umkmForm, whatsapp: e.target.value.replace(/[^0-9]/g, "") })}
+                  placeholder="Contoh: 6281234567890"
+                  inputMode="numeric"
                   className="rounded-lg"
                 />
               </div>
