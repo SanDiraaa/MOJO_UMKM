@@ -197,7 +197,6 @@ export default function AdminPage() {
             />
             <Button type="submit" className="w-full h-12 rounded-xl text-lg">Login</Button>
           </form>
-          <p className="text-center text-sm text-muted-foreground mt-6">Hint: admin / admin123</p>
         </div>
       </div>
     );
