@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createSessionToken, SESSION_COOKIE_NAME, SESSION_COOKIE_MAX_AGE } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +16,16 @@ export async function POST(request: Request) {
     }
 
     if (username === adminUser && password === adminPass) {
-      return NextResponse.json({ success: true });
+      const token = createSessionToken(username);
+      const response = NextResponse.json({ success: true });
+      response.cookies.set(SESSION_COOKIE_NAME, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: SESSION_COOKIE_MAX_AGE,
+      });
+      return response;
     }
 
     return NextResponse.json({ error: "Username atau password salah" }, { status: 401 });

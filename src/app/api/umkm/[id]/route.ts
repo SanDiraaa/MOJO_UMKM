@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { isAdminRequest } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -31,6 +32,10 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await isAdminRequest())) {
+    return NextResponse.json({ error: "Tidak diizinkan. Silakan login sebagai admin." }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -71,6 +76,10 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!(await isAdminRequest())) {
+    return NextResponse.json({ error: "Tidak diizinkan. Silakan login sebagai admin." }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     await prisma.umkm.delete({

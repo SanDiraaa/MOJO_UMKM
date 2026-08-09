@@ -18,9 +18,11 @@ const KATEGORI_LIST = ["Makanan", "Minuman", "Kerajinan", "Jasa", "Pertanian", "
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   
   const [umkms, setUmkms] = useState<any[]>([]);
   const [dusuns, setDusuns] = useState<any[]>([]);
@@ -56,6 +58,38 @@ export default function AdminPage() {
       setLoggingIn(false);
     }
   };
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch (error) {
+      // abaikan, tetap logout di sisi tampilan
+    } finally {
+      setIsAuthenticated(false);
+      setUsername("");
+      setPassword("");
+      setLoggingOut(false);
+    }
+  };
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await fetch("/api/admin/session");
+        const data = await res.json();
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+          fetchData();
+        }
+      } catch (error) {
+        // biarkan tampil form login kalau gagal cek sesi
+      } finally {
+        setCheckingSession(false);
+      }
+    };
+    checkSession();
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -181,6 +215,14 @@ export default function AdminPage() {
     }
   };
 
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-secondary/20">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary/20 p-4">
@@ -237,8 +279,8 @@ export default function AdminPage() {
           </div>
           <span className="font-bold text-xl">Admin Panel</span>
         </div>
-        <Button variant="ghost" onClick={() => setIsAuthenticated(false)} className="text-muted-foreground hover:text-destructive">
-          <LogOut className="w-4 h-4 mr-2" /> Logout
+        <Button variant="ghost" onClick={handleLogout} disabled={loggingOut} className="text-muted-foreground hover:text-destructive">
+          {loggingOut ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <LogOut className="w-4 h-4 mr-2" />} Logout
         </Button>
       </nav>
 
