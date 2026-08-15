@@ -8,6 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const prisma = new PrismaClient();
 
+// Supaya statistik & daftar dusun di Beranda selalu ambil data terbaru dari database
+// (bukan versi ter-cache), bukan cuma saat build/deploy pertama kali.
+export const dynamic = "force-dynamic";
+
 async function getStats() {
   const [totalDusun, totalUmkm] = await Promise.all([
     prisma.dusun.count(),
