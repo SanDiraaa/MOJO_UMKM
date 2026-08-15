@@ -9,27 +9,43 @@ export async function GET(request: Request) {
   const search = searchParams.get("search") || "";
   const kategori = searchParams.get("kategori") || "Semua";
   const dusunId = searchParams.get("dusunId") || "";
+  const page = Math.max(1, Number(searchParams.get("page")) || 1);
+  const pageSize = Math.min(50, Math.max(1, Number(searchParams.get("pageSize")) || 12));
 
   const isAdmin = await isAdminRequest();
 
+  const where = {
+    nama: { contains: search, mode: "insensitive" as const },
+    ...(kategori !== "Semua" && { kategori }),
+    ...(dusunId && { dusunId }),
+    // Pengunjung publik hanya melihat UMKM yang sudah disetujui admin.
+    // Admin yang sudah login bisa melihat semua status (termasuk yang masih menunggu).
+    ...(!isAdmin && { status: "APPROVED" as const }),
+  };
+
   try {
-    const umkms = await prisma.umkm.findMany({
-      where: {
-        nama: { contains: search, mode: "insensitive" },
-        ...(kategori !== "Semua" && { kategori }),
-        ...(dusunId && { dusunId }),
-        // Pengunjung publik hanya melihat UMKM yang sudah disetujui admin.
-        // Admin yang sudah login bisa melihat semua status (termasuk yang masih menunggu).
-        ...(!isAdmin && { status: "APPROVED" }),
-      },
-      include: {
-        dusun: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+    const [umkms, total] = await Promise.all([
+      prisma.umkm.findMany({
+        where,
+        include: {
+          dusun: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.umkm.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      data: umkms,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
     });
-    return NextResponse.json(umkms);
   } catch (error) {
     return NextResponse.json({ error: "Gagal mengambil data UMKM" }, { status: 500 });
   }

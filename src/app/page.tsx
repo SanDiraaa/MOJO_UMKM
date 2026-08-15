@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { ArrowRight, Store, Map as MapIcon, Users } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import HeroSearch from "@/components/HeroSearch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -68,6 +69,8 @@ export default async function Home() {
               <p className="text-xl text-muted-foreground mb-10 leading-relaxed max-w-2xl mx-auto">
                 Platform resmi untuk menjelajahi, menemukan, dan mendukung berbagai produk unggulan dari Usaha Mikro Kecil dan Menengah di desa kita.
               </p>
+
+              <HeroSearch />
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button size="lg" asChild className="rounded-full w-full sm:w-auto px-8 h-14 text-lg shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all">

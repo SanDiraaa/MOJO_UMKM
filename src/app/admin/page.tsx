@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Pagination from "@/components/Pagination";
 import {
   Select,
   SelectContent,
@@ -96,12 +97,12 @@ export default function AdminPage() {
     setLoading(true);
     try {
       const [umkmRes, dusunRes] = await Promise.all([
-        fetch("/api/umkm"),
+        fetch("/api/umkm?pageSize=1000"),
         fetch("/api/dusun")
       ]);
-      const umkmData = await umkmRes.json();
+      const umkmResult = await umkmRes.json();
       const dusunData = await dusunRes.json();
-      setUmkms(umkmData);
+      setUmkms(umkmResult.data || []);
       setDusuns(dusunData);
     } catch (error) {
       toast.error("Gagal mengambil data");
@@ -127,6 +128,15 @@ export default function AdminPage() {
   };
 
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
+  const [umkmSearch, setUmkmSearch] = useState("");
+  const [umkmStatusFilter, setUmkmStatusFilter] = useState("Semua");
+  const [umkmDusunFilter, setUmkmDusunFilter] = useState("Semua");
+  const [umkmPage, setUmkmPage] = useState(1);
+  const UMKM_PAGE_SIZE = 10;
+
+  useEffect(() => {
+    setUmkmPage(1);
+  }, [umkmSearch, umkmStatusFilter, umkmDusunFilter]);
 
   const handleStatusChange = async (id: string, status: "APPROVED" | "REJECTED" | "PENDING") => {
     setUpdatingStatusId(id);
@@ -302,6 +312,16 @@ export default function AdminPage() {
 
   const stats = getStats();
 
+  // Filter + pagination untuk tabel Daftar UMKM (dihitung dari data yang sudah di-fetch)
+  const filteredUmkms = umkms.filter(u => {
+    const matchSearch = u.nama.toLowerCase().includes(umkmSearch.toLowerCase()) || u.pemilik.toLowerCase().includes(umkmSearch.toLowerCase());
+    const matchStatus = umkmStatusFilter === "Semua" || u.status === umkmStatusFilter;
+    const matchDusun = umkmDusunFilter === "Semua" || u.dusunId === umkmDusunFilter;
+    return matchSearch && matchStatus && matchDusun;
+  });
+  const umkmTotalPages = Math.max(1, Math.ceil(filteredUmkms.length / UMKM_PAGE_SIZE));
+  const paginatedUmkms = filteredUmkms.slice((umkmPage - 1) * UMKM_PAGE_SIZE, umkmPage * UMKM_PAGE_SIZE);
+
   return (
     <div className="min-h-screen bg-secondary/10 flex flex-col">
       <nav className="bg-white border-b sticky top-0 z-10 px-6 py-4 flex items-center justify-between shadow-sm">
@@ -446,13 +466,46 @@ export default function AdminPage() {
 
         {/* UMKM Table */}
         <div className="bg-white rounded-3xl shadow-sm border overflow-hidden">
-          <div className="p-6 border-b flex items-center justify-between bg-white">
-            <h2 className="text-xl font-bold text-foreground">Daftar UMKM Terdaftar</h2>
-            {umkms.filter(u => u.status === "PENDING").length > 0 && (
-              <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-semibold">
-                {umkms.filter(u => u.status === "PENDING").length} menunggu persetujuan
-              </span>
-            )}
+          <div className="p-6 border-b bg-white space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="text-xl font-bold text-foreground">Daftar UMKM Terdaftar</h2>
+              {umkms.filter(u => u.status === "PENDING").length > 0 && (
+                <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-semibold">
+                  {umkms.filter(u => u.status === "PENDING").length} menunggu persetujuan
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Input
+                placeholder="Cari nama UMKM atau pemilik..."
+                value={umkmSearch}
+                onChange={e => setUmkmSearch(e.target.value)}
+                className="rounded-lg sm:max-w-xs"
+              />
+              <Select value={umkmDusunFilter} onValueChange={setUmkmDusunFilter}>
+                <SelectTrigger className="rounded-lg w-full sm:w-48">
+                  <SelectValue placeholder="Semua Dusun" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Semua">Semua Dusun</SelectItem>
+                  {dusuns.map(d => (
+                    <SelectItem key={d.id} value={d.id}>{d.nama}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={umkmStatusFilter} onValueChange={setUmkmStatusFilter}>
+                <SelectTrigger className="rounded-lg w-full sm:w-48">
+                  <SelectValue placeholder="Semua Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Semua">Semua Status</SelectItem>
+                  <SelectItem value="PENDING">Menunggu</SelectItem>
+                  <SelectItem value="APPROVED">Disetujui</SelectItem>
+                  <SelectItem value="REJECTED">Ditolak</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           <div className="overflow-x-auto">
@@ -475,18 +528,19 @@ export default function AdminPage() {
                       Memuat data...
                     </td>
                   </tr>
-                ) : umkms.length === 0 ? (
+                ) : filteredUmkms.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
-                      Belum ada UMKM terdaftar
+                      {umkms.length === 0 ? "Belum ada UMKM terdaftar" : "Tidak ada UMKM yang cocok dengan pencarian/filter"}
                     </td>
                   </tr>
                 ) : (
-                  umkms.map((umkm) => (
+                  paginatedUmkms.map((umkm) => (
                     <tr key={umkm.id} className="border-b border-border/50 hover:bg-secondary/20 transition-colors">
                       <td className="px-6 py-4 font-medium text-foreground">{umkm.nama}</td>
                       <td className="px-6 py-4">{umkm.pemilik}</td>
                       <td className="px-6 py-4">{umkm.dusun?.nama}</td>
+
                       <td className="px-6 py-4">
                         <span className="bg-accent/20 text-accent-foreground px-2 py-1 rounded-md text-xs font-semibold">
                           {umkm.kategori}
@@ -562,6 +616,14 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
+          {!loading && filteredUmkms.length > 0 && (
+            <div className="px-6 pb-6">
+              <p className="text-xs text-muted-foreground text-center mb-2">
+                Menampilkan {paginatedUmkms.length} dari {filteredUmkms.length} UMKM
+              </p>
+              <Pagination page={umkmPage} totalPages={umkmTotalPages} onPageChange={setUmkmPage} />
+            </div>
+          )}
         </div>
       </div>
 

@@ -20,6 +20,7 @@ export default function Navbar() {
         
         <div className="hidden md:flex items-center gap-6">
           <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Beranda</Link>
+          <Link href="/cari" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Cari UMKM</Link>
           <Link href="/daftar" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Daftarkan UMKM</Link>
           <Button asChild className="rounded-full shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
             <Link href="/admin">Login Admin</Link>
@@ -51,6 +52,13 @@ export default function Navbar() {
             className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-primary hover:bg-secondary/50 transition-colors"
           >
             Beranda
+          </Link>
+          <Link
+            href="/cari"
+            onClick={() => setMenuOpen(false)}
+            className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-primary hover:bg-secondary/50 transition-colors"
+          >
+            Cari UMKM
           </Link>
           <Link
             href="/daftar"
