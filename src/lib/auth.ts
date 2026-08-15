@@ -53,6 +53,67 @@ export function verifySessionToken(token: string | undefined | null): boolean {
 
 export const SESSION_COOKIE_MAX_AGE = SESSION_MAX_AGE_SECONDS;
 
+// --- Proteksi brute-force login ---
+export const LOGIN_ATTEMPTS_COOKIE_NAME = "login_attempts";
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_WINDOW_MS = 15 * 60 * 1000; // 15 menit
+
+interface LoginAttemptState {
+  count: number;
+  windowStart: number;
+}
+
+/**
+ * Membuat nilai cookie percobaan login yang ditandatangani (supaya tidak bisa
+ * diubah/reset paksa oleh pengguna dari sisi browser).
+ */
+export function createAttemptsToken(state: LoginAttemptState): string {
+  const payload = `${state.count}.${state.windowStart}`;
+  const signature = sign(payload);
+  return Buffer.from(`${payload}.${signature}`).toString("base64url");
+}
+
+/**
+ * Membaca & memverifikasi state percobaan login dari cookie. Kalau tidak ada,
+ * tidak valid, atau sudah lewat jendela waktu 15 menit, mulai hitungan baru dari 0.
+ */
+export function readAttemptsState(token: string | undefined | null): LoginAttemptState {
+  const fresh: LoginAttemptState = { count: 0, windowStart: Date.now() };
+  if (!token) return fresh;
+  try {
+    const decoded = Buffer.from(token, "base64url").toString("utf-8");
+    const parts = decoded.split(".");
+    if (parts.length !== 3) return fresh;
+    const [countStr, windowStartStr, signature] = parts;
+    const payload = `${countStr}.${windowStartStr}`;
+    const expectedSignature = sign(payload);
+
+    const sigBuffer = Buffer.from(signature);
+    const expectedBuffer = Buffer.from(expectedSignature);
+    if (sigBuffer.length !== expectedBuffer.length) return fresh;
+    if (!timingSafeEqual(sigBuffer, expectedBuffer)) return fresh;
+
+    const count = Number(countStr);
+    const windowStart = Number(windowStartStr);
+    if (!windowStart || Date.now() - windowStart > LOCKOUT_WINDOW_MS) return fresh;
+
+    return { count, windowStart };
+  } catch {
+    return fresh;
+  }
+}
+
+export function isLockedOut(state: LoginAttemptState): boolean {
+  return state.count >= MAX_LOGIN_ATTEMPTS && Date.now() - state.windowStart <= LOCKOUT_WINDOW_MS;
+}
+
+export function getLockoutMinutesLeft(state: LoginAttemptState): number {
+  const msLeft = LOCKOUT_WINDOW_MS - (Date.now() - state.windowStart);
+  return Math.max(1, Math.ceil(msLeft / 60000));
+}
+
+export const LOGIN_ATTEMPTS_MAX_AGE_SECONDS = Math.ceil(LOCKOUT_WINDOW_MS / 1000);
+
 /**
  * Helper untuk dipakai di dalam API Route Handler (server-side) guna mengecek
  * apakah request datang dari admin yang sudah login. Return true/false.

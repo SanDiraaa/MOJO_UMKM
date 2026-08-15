@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Trash2, Loader2, Store, Users, Map as MapIcon, LogOut, Pencil, Check, X } from "lucide-react";
+import Link from "next/link";
+import { Trash2, Loader2, Store, Users, Map as MapIcon, LogOut, Pencil, Check, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -252,6 +253,12 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary/20 p-4">
         <div className="bg-white p-8 md:p-12 rounded-3xl shadow-sm border max-w-md w-full">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors mb-6"
+          >
+            <ArrowLeft className="w-4 h-4" /> Kembali ke Beranda
+          </Link>
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Store className="w-8 h-8" />
