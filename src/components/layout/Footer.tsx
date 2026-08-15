@@ -11,10 +11,10 @@ export default function Footer() {
               <div className="bg-primary p-2 rounded-xl">
                 <Store className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-xl tracking-tight">UMKM <span className="text-primary">Desa</span></span>
+              <span className="font-bold text-xl tracking-tight">UMKM <span className="text-primary">Mojolebak</span></span>
             </Link>
             <p className="text-muted-foreground mb-4 max-w-sm leading-relaxed">
-              Platform direktori untuk memajukan potensi lokal dan menghubungkan UMKM desa dengan pelanggan yang lebih luas.
+              Platform direktori untuk memajukan potensi lokal dan menghubungkan UMKM Desa Mojolebak dengan pelanggan yang lebih luas.
             </p>
           </div>
           
@@ -38,7 +38,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t mt-12 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} UMKM Desa. Hak cipta dilindungi.</p>
+          <p>&copy; {new Date().getFullYear()} UMKM Mojolebak. Hak cipta dilindungi.</p>
           <p className="mt-2 md:mt-0">Dibuat dengan ❤️ untuk kemajuan desa</p>
         </div>
       </div>

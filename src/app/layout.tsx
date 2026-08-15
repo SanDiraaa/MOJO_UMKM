@@ -10,13 +10,13 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "UMKM Desa - Jelajahi Potensi Lokal",
-  description: "Platform direktori dan pendaftaran UMKM Desa. Temukan berbagai produk makanan, minuman, kerajinan, dan jasa dari desa kami.",
+  title: "UMKM Mojolebak - Jelajahi Potensi Lokal Desa Mojolebak",
+  description: "Platform direktori dan pendaftaran UMKM Desa Mojolebak, Kecamatan Jetis, Kabupaten Mojokerto. Temukan berbagai produk makanan, minuman, kerajinan, dan jasa dari warga desa kami.",
   openGraph: {
-    title: "UMKM Desa",
-    description: "Jelajahi berbagai potensi dan produk unggulan dari UMKM di desa kami.",
-    url: "https://umkmdesa.com",
-    siteName: "UMKM Desa",
+    title: "UMKM Mojolebak",
+    description: "Jelajahi berbagai potensi dan produk unggulan dari UMKM Desa Mojolebak.",
+    url: "https://mojo-umkm.vercel.app",
+    siteName: "UMKM Mojolebak",
     locale: "id_ID",
     type: "website",
   },

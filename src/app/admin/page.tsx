@@ -274,7 +274,7 @@ export default function AdminPage() {
               <Store className="w-8 h-8" />
             </div>
             <h1 className="text-2xl font-bold">Admin Panel</h1>
-            <p className="text-muted-foreground mt-2">Login untuk mengelola UMKM Desa</p>
+            <p className="text-muted-foreground mt-2">Login untuk mengelola UMKM Mojolebak</p>
           </div>
           
           <form onSubmit={handleLogin} className="space-y-4">
