@@ -125,6 +125,31 @@ export default function AdminPage() {
     }
   };
 
+  const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
+
+  const handleStatusChange = async (id: string, status: "APPROVED" | "REJECTED" | "PENDING") => {
+    setUpdatingStatusId(id);
+    try {
+      const res = await fetch(`/api/umkm/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setUmkms(umkms.map(u => (u.id === id ? { ...u, status: updated.status } : u)));
+        const label = status === "APPROVED" ? "disetujui" : status === "REJECTED" ? "ditolak" : "dikembalikan ke pending";
+        toast.success(`UMKM ${label}`);
+      } else {
+        toast.error("Gagal mengubah status UMKM");
+      }
+    } catch (error) {
+      toast.error("Terjadi kesalahan");
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
   const startEditDusun = (id: string, currentName: string) => {
     setEditingDusunId(id);
     setEditingDusunName(currentName);
@@ -416,6 +441,11 @@ export default function AdminPage() {
         <div className="bg-white rounded-3xl shadow-sm border overflow-hidden">
           <div className="p-6 border-b flex items-center justify-between bg-white">
             <h2 className="text-xl font-bold text-foreground">Daftar UMKM Terdaftar</h2>
+            {umkms.filter(u => u.status === "PENDING").length > 0 && (
+              <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-semibold">
+                {umkms.filter(u => u.status === "PENDING").length} menunggu persetujuan
+              </span>
+            )}
           </div>
           
           <div className="overflow-x-auto">
@@ -426,20 +456,21 @@ export default function AdminPage() {
                   <th className="px-6 py-4 font-semibold">Pemilik</th>
                   <th className="px-6 py-4 font-semibold">Dusun</th>
                   <th className="px-6 py-4 font-semibold">Kategori</th>
+                  <th className="px-6 py-4 font-semibold">Status</th>
                   <th className="px-6 py-4 font-semibold text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                       <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
                       Memuat data...
                     </td>
                   </tr>
                 ) : umkms.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                       Belum ada UMKM terdaftar
                     </td>
                   </tr>
@@ -454,8 +485,52 @@ export default function AdminPage() {
                           {umkm.kategori}
                         </span>
                       </td>
+                      <td className="px-6 py-4">
+                        {umkm.status === "APPROVED" && (
+                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-md text-xs font-semibold">Disetujui</span>
+                        )}
+                        {umkm.status === "PENDING" && (
+                          <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-md text-xs font-semibold">Menunggu</span>
+                        )}
+                        {umkm.status === "REJECTED" && (
+                          <span className="bg-red-100 text-red-800 px-2 py-1 rounded-md text-xs font-semibold">Ditolak</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-1">
+                        <div className="flex justify-end flex-wrap gap-1">
+                          {umkm.status === "PENDING" && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={updatingStatusId === umkm.id}
+                                onClick={() => handleStatusChange(umkm.id, "APPROVED")}
+                                className="text-green-700 hover:bg-green-100 transition-colors"
+                              >
+                                {updatingStatusId === umkm.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 mr-1" />} Setujui
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={updatingStatusId === umkm.id}
+                                onClick={() => handleStatusChange(umkm.id, "REJECTED")}
+                                className="text-red-700 hover:bg-red-100 transition-colors"
+                              >
+                                <X className="w-4 h-4 mr-1" /> Tolak
+                              </Button>
+                            </>
+                          )}
+                          {umkm.status === "REJECTED" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={updatingStatusId === umkm.id}
+                              onClick={() => handleStatusChange(umkm.id, "APPROVED")}
+                              className="text-green-700 hover:bg-green-100 transition-colors"
+                            >
+                              {updatingStatusId === umkm.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 mr-1" />} Setujui
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"

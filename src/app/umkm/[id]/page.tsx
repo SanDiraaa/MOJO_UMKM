@@ -5,17 +5,28 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { PrismaClient } from "@prisma/client";
 import { Button } from "@/components/ui/button";
+import { isAdminRequest } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
 async function getUmkm(id: string) {
-  return await prisma.umkm.findUnique({
+  const umkm = await prisma.umkm.findUnique({
     where: { id },
     include: {
       dusun: true,
       fotoProduk: true,
     },
   });
+
+  if (!umkm) return null;
+
+  // UMKM yang belum disetujui (pending/ditolak) hanya boleh dilihat admin,
+  // supaya tidak bisa diakses publik lewat link langsung sebelum di-approve.
+  if (umkm.status !== "APPROVED" && !(await isAdminRequest())) {
+    return null;
+  }
+
+  return umkm;
 }
 
 export default async function UmkmDetailPage({

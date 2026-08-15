@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 async function getStats() {
   const [totalDusun, totalUmkm] = await Promise.all([
     prisma.dusun.count(),
-    prisma.umkm.count(),
+    prisma.umkm.count({ where: { status: "APPROVED" } }),
   ]);
   return { totalDusun, totalUmkm };
 }
@@ -20,7 +20,7 @@ async function getDusuns() {
   return await prisma.dusun.findMany({
     include: {
       _count: {
-        select: { umkms: true }
+        select: { umkms: { where: { status: "APPROVED" } } }
       }
     },
     orderBy: {

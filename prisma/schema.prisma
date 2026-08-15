@@ -16,6 +16,12 @@ model Dusun {
   umkms Umkm[]
 }
 
+enum UmkmStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Umkm {
   id             String       @id @default(cuid())
   nama           String
@@ -27,6 +33,7 @@ model Umkm {
   jamOperasional String
   whatsapp       String
   fotoUtama      String
+  status         UmkmStatus   @default(APPROVED)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   dusunId        String

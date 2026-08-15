@@ -37,6 +37,8 @@ export default function DaftarPage() {
   const router = useRouter();
   const [dusuns, setDusuns] = useState<{id: string, nama: string}[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formLoadedAt] = useState(() => Date.now());
+  const [honeypot, setHoneypot] = useState("");
 
   useEffect(() => {
     fetch("/api/dusun")
@@ -68,13 +70,13 @@ export default function DaftarPage() {
       const res = await fetch("/api/umkm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, website: honeypot, formLoadedAt }),
       });
 
       if (!res.ok) throw new Error("Gagal mendaftar");
       
       toast.success("UMKM berhasil didaftarkan.", {
-        description: "Data usaha Anda kini dapat dilihat oleh masyarakat luas."
+        description: "Data usaha Anda akan ditinjau admin terlebih dahulu sebelum tampil untuk publik."
       });
       router.push("/");
     } catch (error) {
@@ -102,6 +104,21 @@ export default function DaftarPage() {
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Honeypot anti-spam: field ini disembunyikan dari pengguna manusia lewat CSS,
+                    tapi bot yang mengisi semua field secara otomatis biasanya ikut mengisi ini. */}
+                <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}>
+                  <label htmlFor="website">Jangan isi field ini</label>
+                  <input
+                    type="text"
+                    id="website"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={e => setHoneypot(e.target.value)}
+                  />
+                </div>
+
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField

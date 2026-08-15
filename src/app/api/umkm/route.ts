@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { isAdminRequest } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -9,12 +10,17 @@ export async function GET(request: Request) {
   const kategori = searchParams.get("kategori") || "Semua";
   const dusunId = searchParams.get("dusunId") || "";
 
+  const isAdmin = await isAdminRequest();
+
   try {
     const umkms = await prisma.umkm.findMany({
       where: {
         nama: { contains: search, mode: "insensitive" },
         ...(kategori !== "Semua" && { kategori }),
         ...(dusunId && { dusunId }),
+        // Pengunjung publik hanya melihat UMKM yang sudah disetujui admin.
+        // Admin yang sudah login bisa melihat semua status (termasuk yang masih menunggu).
+        ...(!isAdmin && { status: "APPROVED" }),
       },
       include: {
         dusun: true,
@@ -29,10 +35,25 @@ export async function GET(request: Request) {
   }
 }
 
+// Batas waktu minimum (ms) antara halaman form dimuat dan disubmit.
+// Bot biasanya submit dalam hitungan milidetik, manusia butuh waktu untuk mengisi form.
+const MIN_SUBMIT_TIME_MS = 3000;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nama, pemilik, kategori, deskripsi, alamat, mapsUrl, jamOperasional, whatsapp, fotoUtama, dusunId, fotoProduk } = body;
+    const { nama, pemilik, kategori, deskripsi, alamat, mapsUrl, jamOperasional, whatsapp, fotoUtama, dusunId, fotoProduk, website, formLoadedAt } = body;
+
+    // --- Proteksi anti-spam sederhana (honeypot + time-trap) ---
+    // 1. Honeypot: field "website" seharusnya selalu kosong untuk manusia (disembunyikan dari tampilan).
+    //    Bot yang otomatis mengisi semua field biasanya ikut mengisi field ini.
+    if (website) {
+      return NextResponse.json({ error: "Gagal menyimpan data UMKM" }, { status: 400 });
+    }
+    // 2. Time-trap: kalau form disubmit terlalu cepat dari waktu halaman dimuat, kemungkinan besar bot.
+    if (!formLoadedAt || Date.now() - Number(formLoadedAt) < MIN_SUBMIT_TIME_MS) {
+      return NextResponse.json({ error: "Gagal menyimpan data UMKM" }, { status: 400 });
+    }
 
     const newUmkm = await prisma.umkm.create({
       data: {
@@ -46,6 +67,7 @@ export async function POST(request: Request) {
         whatsapp,
         fotoUtama,
         dusunId,
+        status: "PENDING",
         fotoProduk: {
           create: fotoProduk?.map((url: string) => ({ url })) || [],
         },
