@@ -10,6 +10,7 @@ import { Store, Loader2 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ImageUploader from "@/components/ImageUploader";
+import OperatingHoursPicker from "@/components/OperatingHoursPicker";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -238,34 +239,33 @@ export default function DaftarPage() {
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="jamOperasional"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Jam Operasional</FormLabel>
-                        <FormControl>
-                          <Input placeholder="08:00 - 17:00 (Senin - Sabtu)" className="h-12 rounded-xl" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="whatsapp"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nomor WhatsApp (Hanya Angka)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="081234567890" className="h-12 rounded-xl" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="jamOperasional"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Jam Operasional</FormLabel>
+                      <FormControl>
+                        <OperatingHoursPicker value={field.value} onChange={field.onChange} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="whatsapp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nomor WhatsApp (Hanya Angka)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="081234567890" className="h-12 rounded-xl" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="pt-4 border-t border-border/50 space-y-6">
                   <FormField
