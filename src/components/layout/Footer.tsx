@@ -8,10 +8,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="bg-primary p-2 rounded-xl">
+              <div className="bg-primary p-2 rounded-t-full rounded-b-md">
                 <Store className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-xl tracking-tight">UMKM <span className="text-primary">Mojolebak</span></span>
+              <span className="font-display font-bold text-xl tracking-tight">UMKM <span className="text-primary">Mojolebak</span></span>
             </Link>
             <p className="text-muted-foreground mb-4 max-w-sm leading-relaxed">
               Platform direktori untuk memajukan potensi lokal dan menghubungkan UMKM Desa Mojolebak dengan pelanggan yang lebih luas.

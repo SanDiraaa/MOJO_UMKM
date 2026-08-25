@@ -12,10 +12,10 @@ export default function Navbar() {
     <nav className="bg-white sticky top-0 z-50 border-b border-border/40 shadow-sm backdrop-blur-md bg-white/80">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group" onClick={() => setMenuOpen(false)}>
-          <div className="bg-primary p-2 rounded-xl group-hover:bg-primary/90 transition-colors">
+          <div className="bg-primary p-2 rounded-t-full rounded-b-md group-hover:bg-primary/90 transition-colors">
             <Store className="h-5 w-5 text-white" />
           </div>
-          <span className="font-bold text-xl text-foreground tracking-tight">UMKM <span className="text-primary">Mojolebak</span></span>
+          <span className="font-display font-bold text-xl text-foreground tracking-tight">UMKM <span className="text-primary">Mojolebak</span></span>
         </Link>
         
         <div className="hidden md:flex items-center gap-6">

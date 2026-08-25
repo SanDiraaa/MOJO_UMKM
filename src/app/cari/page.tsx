@@ -76,7 +76,7 @@ function CariContent() {
       <main className="flex-grow bg-secondary/20 min-h-screen pb-24">
         <div className="bg-white border-b pt-12 pb-8">
           <div className="container mx-auto px-4">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
               Cari <span className="text-primary">UMKM</span>
             </h1>
             <p className="text-muted-foreground text-lg mb-8 max-w-2xl">

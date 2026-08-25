@@ -30,10 +30,17 @@ export default function UmkmCard({ umkm }: UmkmCardProps) {
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-foreground text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
           {umkm.kategori}
         </div>
+        {/* Motif gapura: lengkung gerbang kecil di sudut, menandai "gerbang" menuju detail UMKM */}
+        <div className="absolute -bottom-4 left-4 w-10 h-10 bg-accent rounded-t-full rounded-b-md shadow-md flex items-center justify-center">
+          <svg viewBox="0 0 24 24" className="w-5 h-5 text-accent-foreground" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M5 20V11a7 7 0 0 1 14 0v9" strokeLinecap="round" />
+            <path d="M3 20h18" strokeLinecap="round" />
+          </svg>
+        </div>
       </div>
       
-      <CardContent className="p-6 flex flex-col flex-grow">
-        <h3 className="text-xl font-bold text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-colors">
+      <CardContent className="p-6 pt-8 flex flex-col flex-grow">
+        <h3 className="text-xl font-display font-bold text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-colors">
           {umkm.nama}
         </h3>
         

@@ -7,6 +7,7 @@
 @theme {
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-display: var(--font-bitter), ui-serif, Georgia, serif;
 
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -60,64 +61,64 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* White */
-    --foreground: 120 10% 10%; /* Very dark green/gray */
+    --background: 42 45% 96%; /* Krem beras hangat */
+    --foreground: 140 18% 14%; /* Hijau-coklat gelap, seperti tanah basah */
 
     --card: 0 0% 100%;
-    --card-foreground: 120 10% 10%;
+    --card-foreground: 140 18% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 120 10% 10%;
+    --popover-foreground: 140 18% 14%;
 
-    --primary: 142 71% 45%; /* Green */
-    --primary-foreground: 0 0% 100%;
+    --primary: 127 32% 23%; /* Hijau tebu tua */
+    --primary-foreground: 42 40% 96%;
 
-    --secondary: 142 10% 95%; /* Light Green/Gray */
-    --secondary-foreground: 142 71% 30%;
+    --secondary: 42 32% 91%; /* Krem tanah, panel sekunder */
+    --secondary-foreground: 127 32% 20%;
 
-    --muted: 120 10% 95%;
-    --muted-foreground: 120 5% 45%;
+    --muted: 42 25% 92%;
+    --muted-foreground: 30 18% 38%; /* Coklat tanah hangat */
 
-    --accent: 48 96% 53%; /* Yellow accent */
-    --accent-foreground: 120 10% 10%;
+    --accent: 43 68% 63%; /* Emas bunga tebu */
+    --accent-foreground: 30 45% 18%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 10 56% 42%; /* Merah bata gapura */
+    --destructive-foreground: 42 40% 96%;
 
-    --border: 120 10% 90%;
-    --input: 120 10% 90%;
-    --ring: 142 71% 45%;
+    --border: 42 22% 85%;
+    --input: 42 22% 85%;
+    --ring: 127 32% 23%;
     --radius: 0.75rem; /* rounded-xl base */
   }
 
   .dark {
-    --background: 120 10% 10%;
-    --foreground: 0 0% 100%;
+    --background: 140 18% 10%;
+    --foreground: 42 30% 94%;
 
-    --card: 120 10% 12%;
-    --card-foreground: 0 0% 100%;
+    --card: 140 15% 13%;
+    --card-foreground: 42 30% 94%;
 
-    --popover: 120 10% 12%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 140 15% 13%;
+    --popover-foreground: 42 30% 94%;
 
-    --primary: 142 71% 45%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 127 35% 45%;
+    --primary-foreground: 140 18% 10%;
 
-    --secondary: 120 10% 20%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 140 12% 20%;
+    --secondary-foreground: 42 30% 94%;
 
-    --muted: 120 10% 20%;
-    --muted-foreground: 120 5% 65%;
+    --muted: 140 12% 20%;
+    --muted-foreground: 42 15% 65%;
 
-    --accent: 48 96% 53%;
-    --accent-foreground: 120 10% 10%;
+    --accent: 43 68% 58%;
+    --accent-foreground: 30 45% 14%;
 
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 10 50% 40%;
+    --destructive-foreground: 42 30% 94%;
 
-    --border: 120 10% 20%;
-    --input: 120 10% 20%;
-    --ring: 142 71% 45%;
+    --border: 140 12% 22%;
+    --input: 140 12% 22%;
+    --ring: 127 35% 45%;
   }
 }
 

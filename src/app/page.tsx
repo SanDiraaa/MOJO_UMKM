@@ -44,12 +44,35 @@ export default async function Home() {
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-white pt-24 pb-32">
-          {/* Background decoration */}
-          <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3">
-            <div className="w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl"></div>
-          </div>
-          <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3">
-            <div className="w-[500px] h-[500px] bg-accent/10 rounded-full blur-3xl"></div>
+          {/* Ilustrasi gapura & ladang tebu \u2014 signature visual desa Mojolebak */}
+          <div className="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
+            <svg
+              viewBox="0 0 1200 500"
+              preserveAspectRatio="xMidYMax slice"
+              className="absolute inset-0 w-full h-full"
+            >
+              {/* Siluet gapura besar, tersamar di belakang teks */}
+              <path
+                d="M 470 500 L 470 210 Q 470 110 600 90 Q 730 110 730 210 L 730 500"
+                fill="none"
+                stroke="hsl(var(--primary))"
+                strokeWidth="26"
+                opacity="0.06"
+              />
+              {/* Baris tebu di kaki halaman */}
+              {Array.from({ length: 34 }).map((_, i) => {
+                const x = 10 + i * 36;
+                const h = 60 + (i % 5) * 14;
+                const gold = i % 3 === 0;
+                return (
+                  <g key={i} opacity="0.10">
+                    <line x1={x} y1={500} x2={x} y2={500 - h} stroke={gold ? "hsl(var(--accent))" : "hsl(var(--primary))"} strokeWidth="5" strokeLinecap="round" />
+                    <path d={`M ${x} ${500 - h} q -10 -14 -18 -26`} stroke={gold ? "hsl(var(--accent))" : "hsl(var(--primary))"} strokeWidth="4" fill="none" strokeLinecap="round" />
+                    <path d={`M ${x} ${500 - h} q 10 -14 18 -26`} stroke={gold ? "hsl(var(--accent))" : "hsl(var(--primary))"} strokeWidth="4" fill="none" strokeLinecap="round" />
+                  </g>
+                );
+              })}
+            </svg>
           </div>
 
           <div className="container mx-auto px-4 relative z-10">
@@ -59,9 +82,9 @@ export default async function Home() {
                 <span>Pusat Informasi UMKM</span>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground mb-6 leading-tight">
+              <h1 className="text-5xl md:text-6xl font-display font-bold tracking-tight text-foreground mb-6 leading-tight">
                 Dukung Produk Lokal <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-400">
+                <span className="text-primary">
                   Majukan Ekonomi Desa
                 </span>
               </h1>
@@ -110,7 +133,7 @@ export default async function Home() {
         <section id="dusun" className="py-24 bg-secondary/30 relative">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Wilayah Dusun</h2>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">Wilayah Dusun</h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
                 Pilih dusun untuk melihat daftar UMKM dan produk unggulan yang tersedia di wilayah tersebut.
               </p>
@@ -124,7 +147,7 @@ export default async function Home() {
                       <div className="w-16 h-16 rounded-2xl bg-secondary/50 group-hover:bg-primary group-hover:text-white text-primary flex items-center justify-center mb-6 transition-colors duration-300">
                         <MapIcon className="w-8 h-8" />
                       </div>
-                      <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{dusun.nama}</h3>
+                      <h3 className="text-2xl font-display font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{dusun.nama}</h3>
                       <p className="text-muted-foreground mb-8">
                         <span className="font-semibold text-foreground">{dusun._count.umkms}</span> UMKM Terdaftar
                       </p>

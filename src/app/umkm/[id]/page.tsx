@@ -1,8 +1,8 @@
 import { MapPin, Phone, User, Clock, Store, ChevronRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import PhotoGallery from "@/components/PhotoGallery";
 import { PrismaClient } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { isAdminRequest } from "@/lib/auth";
@@ -81,30 +81,7 @@ export default async function UmkmDetailPage({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:divide-x divide-border">
               {/* Image Gallery */}
               <div className="p-6 lg:p-10 flex flex-col gap-4">
-                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-secondary w-full border">
-                  <Image
-                    src={umkm.fotoUtama || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80"}
-                    alt={umkm.nama}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
-                
-                {umkm.fotoProduk && umkm.fotoProduk.length > 0 && (
-                  <div className="grid grid-cols-4 gap-3 mt-2">
-                    {umkm.fotoProduk.map((foto, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-xl overflow-hidden bg-secondary border hover:ring-2 ring-primary transition-all cursor-pointer">
-                        <Image
-                          src={foto.url}
-                          alt={`Produk ${idx + 1}`}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <PhotoGallery mainImage={umkm.fotoUtama} productImages={umkm.fotoProduk || []} alt={umkm.nama} />
               </div>
 
               {/* Details */}
@@ -113,7 +90,7 @@ export default async function UmkmDetailPage({
                   {umkm.kategori}
                 </div>
                 
-                <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">{umkm.nama}</h1>
+                <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">{umkm.nama}</h1>
                 
                 <div className="space-y-4 mb-8">
                   <div className="flex items-start gap-3 text-muted-foreground">

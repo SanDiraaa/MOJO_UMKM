@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Poppins, Bitter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -7,6 +7,12 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-poppins",
+});
+
+const bitter = Bitter({
+  weight: ["600", "700", "800"],
+  subsets: ["latin"],
+  variable: "--font-bitter",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className={`${poppins.variable} font-sans antialiased bg-secondary/20 min-h-screen flex flex-col`}>
+      <body className={`${poppins.variable} ${bitter.variable} font-sans antialiased bg-secondary/20 min-h-screen flex flex-col`}>
         {children}
         <Toaster />
       </body>
