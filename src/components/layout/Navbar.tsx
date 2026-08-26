@@ -22,6 +22,7 @@ export default function Navbar() {
           <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Beranda</Link>
           <Link href="/cari" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Cari UMKM</Link>
           <Link href="/daftar" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Daftarkan UMKM</Link>
+          <Link href="/panduan" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Panduan</Link>
           <Button asChild className="rounded-full shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
             <Link href="/admin">Login Admin</Link>
           </Button>
@@ -66,6 +67,13 @@ export default function Navbar() {
             className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-primary hover:bg-secondary/50 transition-colors"
           >
             Daftarkan UMKM
+          </Link>
+          <Link
+            href="/panduan"
+            onClick={() => setMenuOpen(false)}
+            className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-primary hover:bg-secondary/50 transition-colors"
+          >
+            Panduan
           </Link>
           <Link href="/admin" onClick={() => setMenuOpen(false)} className="mt-1">
             <Button className="w-full rounded-full">Login Admin</Button>

@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "sonner";
-import { Store, Loader2 } from "lucide-react";
+import { Store, Loader2, BookOpen } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ImageUploader from "@/components/ImageUploader";
@@ -102,6 +103,14 @@ export default function DaftarPage() {
                 <p className="text-muted-foreground mt-1">Lengkapi form berikut untuk mempromosikan usaha Anda.</p>
               </div>
             </div>
+
+            <Link
+              href="/panduan"
+              className="flex items-center gap-2 text-sm text-primary bg-primary/5 hover:bg-primary/10 transition-colors rounded-xl px-4 py-3 mb-6 w-fit"
+            >
+              <BookOpen className="w-4 h-4" />
+              Bingung cara mengisi? Lihat panduan pendaftaran
+            </Link>
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
