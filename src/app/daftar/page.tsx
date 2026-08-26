@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "sonner";
-import { Store, Loader2, BookOpen } from "lucide-react";
+import { Store, Loader2, BookOpen, CheckCircle2, MessageCircle } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ImageUploader from "@/components/ImageUploader";
@@ -35,12 +35,17 @@ const formSchema = z.object({
 
 const KATEGORI = ["Makanan", "Minuman", "Kerajinan", "Jasa", "Pertanian", "Peternakan"];
 
+// Nomor WhatsApp admin desa untuk konfirmasi pendaftaran UMKM baru
+const ADMIN_WHATSAPP = "6281335977513";
+
 export default function DaftarPage() {
   const router = useRouter();
   const [dusuns, setDusuns] = useState<{id: string, nama: string}[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formLoadedAt] = useState(() => Date.now());
   const [honeypot, setHoneypot] = useState("");
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [submittedNama, setSubmittedNama] = useState("");
 
   useEffect(() => {
     fetch("/api/dusun")
@@ -76,17 +81,20 @@ export default function DaftarPage() {
       });
 
       if (!res.ok) throw new Error("Gagal mendaftar");
-      
-      toast.success("UMKM berhasil didaftarkan.", {
-        description: "Data usaha Anda akan ditinjau admin terlebih dahulu sebelum tampil untuk publik."
-      });
-      router.push("/");
+
+      setSubmittedNama(values.nama);
+      setShowConfirmDialog(true);
     } catch (error) {
       toast.error("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setIsSubmitting(false);
     }
   }
+
+  const waMessage = encodeURIComponent(
+    `Halo Admin, saya baru saja mendaftarkan UMKM "${submittedNama}" di website. Mohon bantu ditinjau ya. Terima kasih.`
+  );
+  const waLink = `https://wa.me/${ADMIN_WHATSAPP}?text=${waMessage}`;
 
   return (
     <>
@@ -327,6 +335,44 @@ export default function DaftarPage() {
         </div>
       </main>
       <Footer />
+
+      {/* Modal konfirmasi setelah berhasil daftar */}
+      {showConfirmDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-3xl shadow-lg border w-full max-w-md p-6 md:p-8 text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-5">
+              <CheckCircle2 className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="text-xl font-display font-bold text-foreground mb-2">
+              UMKM Berhasil Didaftarkan!
+            </h2>
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              Data usaha <strong className="text-foreground">"{submittedNama}"</strong> akan ditinjau admin terlebih dahulu sebelum tampil ke publik. Untuk mempercepat proses, silakan konfirmasi ke admin lewat WhatsApp.
+            </p>
+
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#20BD5C] text-white font-medium transition-colors mb-3"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Konfirmasi ke Admin via WhatsApp
+            </a>
+
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => {
+                setShowConfirmDialog(false);
+                router.push("/");
+              }}
+            >
+              Nanti Saja, Kembali ke Beranda
+            </Button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
