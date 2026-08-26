@@ -30,7 +30,17 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-lg mb-4 text-foreground">Kontak</h3>
             <ul className="space-y-3 text-muted-foreground">
-              <li className="flex items-center gap-3"><MapPin className="h-4 w-4 text-primary" /> Kantor Desa Maju Jaya</li>
+              <li className="flex items-center gap-3">
+                <MapPin className="h-4 w-4 text-primary shrink-0" />
+                <a
+                  href="https://maps.app.goo.gl/SZi5gCveE7dj7oEr8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary hover:underline transition-colors"
+                >
+                  Balai Desa Mojolebak
+                </a>
+              </li>
               <li className="flex items-center gap-3"><Phone className="h-4 w-4 text-primary" /> +62 812 3456 7890</li>
               <li className="flex items-center gap-3"><Mail className="h-4 w-4 text-primary" /> info@umkmdesa.com</li>
             </ul>
@@ -38,7 +48,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t mt-12 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} UMKM Mojolebak. Hak cipta dilindungi.</p>
+          <p>&copy; {new Date().getFullYear()} KKN Kelompok 10 UMG. Hak cipta dilindungi.</p>
           <p className="mt-2 md:mt-0">Dibuat dengan ❤️ untuk kemajuan desa</p>
         </div>
       </div>
