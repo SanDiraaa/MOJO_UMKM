@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Bitter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import AssistantWidget from "@/components/AssistantWidget";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -37,6 +38,7 @@ export default function RootLayout({
     <html lang="id">
       <body className={`${poppins.variable} ${bitter.variable} font-sans antialiased bg-secondary/20 min-h-screen flex flex-col`}>
         {children}
+        <AssistantWidget />
         <Toaster />
       </body>
     </html>
