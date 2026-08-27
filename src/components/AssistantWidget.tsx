@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { MessageCircle, X, Send, Store, MapPin } from "lucide-react";
+import { MessageCircle, X, Send, Store, MapPin, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -22,7 +22,7 @@ const QUICK_REPLIES = ["Cara daftar UMKM", "Nomor WA admin", "Cari UMKM"];
 
 const INITIAL_MESSAGE: Message = {
   role: "bot",
-  text: "Halo! 👋 Saya asisten singkat website UMKM Mojolebak. Saya bisa bantu jawab soal cara pendaftaran, nomor WA admin, atau mencari UMKM yang sudah terdaftar. Ada yang bisa dibantu?",
+  text: "Halo! 👋 Saya Mas Lucky, asisten singkat website UMKM Mojolebak. Saya bisa bantu jawab soal cara pendaftaran, nomor WA admin, atau mencari UMKM yang sudah terdaftar. Ada yang bisa dibantu?",
 };
 
 function matchIntent(input: string): "panduan" | "kontak" | "cari" | "sapa" | "makasih" | "unknown" {
@@ -136,10 +136,24 @@ export default function AssistantWidget() {
       {/* Tombol mengambang */}
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Tutup asisten" : "Buka asisten"}
-        className="fixed bottom-5 right-5 z-40 bg-primary hover:bg-primary/90 text-primary-foreground rounded-t-full rounded-b-2xl w-14 h-14 flex items-center justify-center shadow-lg shadow-primary/30 transition-transform hover:scale-105"
+        aria-label={open ? "Tutup asisten" : "Chat dengan Mas Lucky"}
+        className={`fixed bottom-5 right-5 z-40 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 flex items-center ${
+          open ? "rounded-t-full rounded-b-2xl w-14 h-14 justify-center" : "rounded-full h-14 pl-4 pr-5 gap-2"
+        }`}
       >
-        {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+        {open ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <>
+            <span className="relative">
+              <MessageCircle className="w-6 h-6" />
+              <span className="absolute -top-1.5 -right-1.5 bg-accent text-accent-foreground text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
+                <Sparkles className="w-2.5 h-2.5" />
+              </span>
+            </span>
+            <span className="text-sm font-semibold whitespace-nowrap">Tanya Mas Lucky</span>
+          </>
+        )}
       </button>
 
       {/* Panel chat */}
@@ -150,8 +164,8 @@ export default function AssistantWidget() {
               <Store className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-display font-bold text-sm leading-tight">Asisten UMKM Mojolebak</p>
-              <p className="text-xs text-primary-foreground/80 leading-tight">Jawaban singkat & otomatis</p>
+              <p className="font-display font-bold text-sm leading-tight">Mas Lucky</p>
+              <p className="text-xs text-primary-foreground/80 leading-tight">Asisten Virtual UMKM Mojolebak</p>
             </div>
           </div>
 
