@@ -22,25 +22,40 @@ const QUICK_REPLIES = ["Cara daftar UMKM", "Nomor WA admin", "Cari UMKM"];
 
 const INITIAL_MESSAGE: Message = {
   role: "bot",
-  text: "Halo! 👋 Saya Mas Lucky, asisten singkat website UMKM Mojolebak. Saya bisa bantu jawab soal cara pendaftaran, nomor WA admin, atau mencari UMKM yang sudah terdaftar. Ada yang bisa dibantu?",
+  text: "Halo! 👋 Saya Mas Lucky, asisten singkat website UMKM Mojolebak. Tanya-tanya aja soal cara daftar, kontak admin, atau langsung sebutkan nama/jenis UMKM yang kamu cari — saya bantu carikan.",
 };
 
-function matchIntent(input: string): "panduan" | "kontak" | "cari" | "sapa" | "makasih" | "unknown" {
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// Kata-kata umum yang tidak relevan untuk dijadikan kata kunci pencarian UMKM.
+// Dengan membuang kata-kata ini, pengguna tidak perlu menulis "cari" secara eksplisit —
+// sisa katanya (biasanya nama usaha/produk) langsung dipakai untuk mencari ke database.
+const STOPWORDS = [
+  "cari", "carikan", "carilah", "nyari", "mencari", "search", "tolong", "bisa", "boleh", "bantu",
+  "ada", "adakah", "apakah", "apa", "dimana", "di", "mana", "gimana", "bagaimana",
+  "tau", "tahu", "nggak", "gak", "enggak", "ga", "kah", "dong", "ya", "sih", "deh", "nih", "itu", "ini",
+  "umkm", "usaha", "toko", "warung", "jual", "jualan", "yang", "punya", "nama", "namanya",
+  "mau", "pengen", "ingin", "saya", "aku", "kamu", "kah", "kalau", "kalo", "ada", "gak", "kak", "min",
+];
+
+function matchIntent(input: string): "panduan" | "kontak" | "sapa" | "makasih" | "search" {
   const t = input.toLowerCase();
-  if (/(cara|gimana|bagaimana|langkah).*(daftar|mendaftar|registrasi)|panduan/.test(t)) return "panduan";
+  if (/(cara|gimana|bagaimana|langkah).*(daftar|mendaftar|registrasi)|^panduan\b|\bpanduan\b.*(daftar|umkm)/.test(t)) return "panduan";
   if (/(nomor|no\.?|kontak).*(wa|whatsapp|admin)|(wa|whatsapp|hubungi|kontak).*admin/.test(t)) return "kontak";
-  if (/^(cari|carikan|ada umkm|nyari|search)\b/.test(t) || /\bumkm\b.*\bnama\b/.test(t)) return "cari";
-  if (/^(halo|hai|hi|pagi|siang|sore|malam)\b/.test(t)) return "sapa";
-  if (/(makasih|terima kasih|thanks)/.test(t)) return "makasih";
-  return "unknown";
+  if (/^(halo|hai|hi|pagi|siang|sore|malam|assalamualaikum)\b/.test(t) && t.length < 20) return "sapa";
+  if (/(makasih|terima ?kasih|thanks|thx)/.test(t)) return "makasih";
+  return "search";
 }
 
 function extractSearchTerm(input: string): string {
-  return input
+  const words = input
     .toLowerCase()
-    .replace(/^(cari|carikan|nyari|search)\b/, "")
-    .replace(/\b(umkm|usaha|toko|dong|ya|nama)\b/g, "")
-    .trim();
+    .replace(/[?!.,]/g, "")
+    .split(/\s+/)
+    .filter((w) => w && !STOPWORDS.includes(w));
+  return words.join(" ").trim();
 }
 
 export default function AssistantWidget() {
@@ -70,19 +85,36 @@ export default function AssistantWidget() {
     const intent = matchIntent(text);
 
     if (intent === "sapa") {
-      pushBotMessage({ role: "bot", text: "Halo juga! Ada yang bisa saya bantu? Kamu bisa tanya soal pendaftaran, nomor admin, atau cari UMKM tertentu." });
+      pushBotMessage({
+        role: "bot",
+        text: pick([
+          "Halo juga! Ada yang bisa saya bantu? Coba tanya soal pendaftaran, kontak admin, atau sebutkan nama UMKM yang kamu cari.",
+          "Hai! 😊 Mau tanya soal cara daftar, nomor admin, atau lagi nyari UMKM tertentu?",
+          "Halo! Ada yang bisa dibantu hari ini?",
+        ]),
+      });
       return;
     }
 
     if (intent === "makasih") {
-      pushBotMessage({ role: "bot", text: "Sama-sama! Kalau ada pertanyaan lain, tanya saja lagi ya 🙂" });
+      pushBotMessage({
+        role: "bot",
+        text: pick([
+          "Sama-sama! Kalau ada pertanyaan lain, tanya saja lagi ya 🙂",
+          "Siap, senang bisa bantu! Jangan sungkan tanya lagi kalau butuh sesuatu.",
+          "Sama-sama 🙌",
+        ]),
+      });
       return;
     }
 
     if (intent === "panduan") {
       pushBotMessage({
         role: "bot",
-        text: "Untuk mendaftarkan UMKM, isi form di halaman Daftarkan UMKM: nama usaha, kategori, alamat, jam operasional, nomor WA, dan foto usaha. Setelah kirim, data akan ditinjau admin dulu sebelum tampil publik. Panduan lengkapnya ada di sini:",
+        text: pick([
+          "Gampang kok! Isi form di halaman Daftarkan UMKM: nama usaha, kategori, alamat, jam operasional, nomor WA, dan foto usaha. Setelah dikirim, admin akan meninjau dulu sebelum tampil ke publik. Panduan lengkapnya di sini:",
+          "Untuk daftar, tinggal buka halaman pendaftaran dan isi data usahamu (nama, kategori, alamat, jam buka, WA, foto). Nanti ditinjau admin dulu ya sebelum muncul di website. Detail langkah-langkahnya bisa dibaca di sini:",
+        ]),
         link: { label: "📖 Buka Panduan Pendaftaran", href: "/panduan" },
       });
       return;
@@ -91,44 +123,59 @@ export default function AssistantWidget() {
     if (intent === "kontak") {
       pushBotMessage({
         role: "bot",
-        text: "Kamu bisa hubungi admin desa lewat WhatsApp di nomor 0813-3597-7513, atau klik tombol di bawah ini untuk langsung chat:",
+        text: pick([
+          "Admin desa bisa dihubungi lewat WhatsApp di 0813-3597-7513, atau langsung klik tombol ini:",
+          "Ini kontak admin desa ya, bisa langsung chat lewat tombol di bawah:",
+        ]),
         link: { label: "💬 Chat Admin di WhatsApp", href: `https://wa.me/${ADMIN_WHATSAPP}` },
       });
       return;
     }
 
-    if (intent === "cari") {
-      const term = extractSearchTerm(text);
-      if (!term) {
-        pushBotMessage({ role: "bot", text: "UMKM apa yang mau kamu cari? Coba ketik misalnya \"cari warung sembako\"." });
-        return;
-      }
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/umkm?search=${encodeURIComponent(term)}&pageSize=5`);
-        const result = await res.json();
-        const items: UmkmResult[] = result.data || [];
-        if (items.length === 0) {
-          pushBotMessage({
-            role: "bot",
-            text: `Tidak ditemukan UMKM dengan nama mengandung "${term}". Coba kata kunci lain, atau jelajahi semua UMKM di sini:`,
-            link: { label: "🔍 Buka Halaman Cari UMKM", href: "/cari" },
-          });
-        } else {
-          pushBotMessage({ role: "bot", text: `Ditemukan ${items.length} UMKM yang cocok:`, results: items });
-        }
-      } catch {
-        pushBotMessage({ role: "bot", text: "Maaf, terjadi kesalahan saat mencari. Coba lagi sebentar lagi ya." });
-      } finally {
-        setLoading(false);
-      }
+    // Default: anggap ini pertanyaan mencari UMKM, tanpa perlu kata pemicu seperti "cari"
+    const term = extractSearchTerm(text);
+
+    if (!term || term.length < 2) {
+      pushBotMessage({
+        role: "bot",
+        text: pick([
+          "Hmm, saya belum menangkap maksudnya. Coba sebutkan nama usaha atau jenis produk yang kamu cari, misalnya \"warung sembako\" atau \"kerupuk pasir\". Atau tanya soal pendaftaran/kontak admin ya.",
+          "Boleh diperjelas lagi? Kamu bisa langsung sebut nama UMKM atau jenis usahanya, atau tanya soal cara daftar & kontak admin.",
+        ]),
+      });
       return;
     }
 
-    pushBotMessage({
-      role: "bot",
-      text: "Maaf, saya belum mengerti pertanyaan itu. Saya baru bisa bantu soal cara pendaftaran, nomor WA admin, atau pencarian UMKM. Coba salah satu tombol di bawah ini:",
-    });
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/umkm?search=${encodeURIComponent(term)}&pageSize=5`);
+      const result = await res.json();
+      const items: UmkmResult[] = result.data || [];
+      if (items.length === 0) {
+        pushBotMessage({
+          role: "bot",
+          text: pick([
+            `Belum ketemu UMKM yang cocok dengan "${term}" nih. Coba kata kunci lain, atau lihat semua UMKM di sini:`,
+            `Hmm, tidak ada hasil untuk "${term}". Mungkin salah ketik atau belum terdaftar. Coba jelajahi semua UMKM di sini:`,
+          ]),
+          link: { label: "🔍 Buka Halaman Cari UMKM", href: "/cari" },
+        });
+      } else {
+        pushBotMessage({
+          role: "bot",
+          text: pick([
+            `Nah, ini ${items.length} UMKM yang cocok:`,
+            `Ketemu ${items.length} UMKM yang sesuai:`,
+            `Ini yang saya temukan:`,
+          ]),
+          results: items,
+        });
+      }
+    } catch {
+      pushBotMessage({ role: "bot", text: "Waduh, ada gangguan saat mencari. Coba lagi sebentar ya." });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
