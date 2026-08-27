@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Store } from "lucide-react";
+import { Store, MousePointerClick } from "lucide-react";
 
 const SESSION_KEY = "mojo_splash_seen";
-const DISPLAY_DURATION = 3000;
+const DISPLAY_DURATION = 10000;
 const FADE_DURATION = 400;
 
 export default function SplashScreen() {
@@ -75,9 +75,10 @@ export default function SplashScreen() {
         </p>
       </div>
 
-      <p className="absolute bottom-8 text-primary-foreground/60 text-xs sm:text-sm animate-pulse">
+      <div className="absolute bottom-8 flex items-center gap-2 bg-white/15 hover:bg-white/20 backdrop-blur-sm text-white text-sm sm:text-base font-medium px-5 py-2.5 rounded-full border border-white/30 animate-pulse">
+        <MousePointerClick className="w-4 h-4" />
         Ketuk di mana saja untuk melewati
-      </p>
+      </div>
     </div>
   );
 }
