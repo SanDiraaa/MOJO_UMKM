@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Trash2, Loader2, Store, Users, Map as MapIcon, LogOut, Pencil, Check, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import Pagination from "@/components/Pagination";
+import { StarDisplay } from "@/components/StarRating";
 import {
   Select,
   SelectContent,
@@ -29,6 +31,7 @@ export default function AdminPage() {
   
   const [umkms, setUmkms] = useState<any[]>([]);
   const [dusuns, setDusuns] = useState<any[]>([]);
+  const [ulasanList, setUlasanList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingDusunId, setEditingDusunId] = useState<string | null>(null);
   const [editingDusunName, setEditingDusunName] = useState("");
@@ -97,14 +100,17 @@ export default function AdminPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [umkmRes, dusunRes] = await Promise.all([
+      const [umkmRes, dusunRes, ulasanRes] = await Promise.all([
         fetch("/api/umkm?pageSize=1000"),
-        fetch("/api/dusun")
+        fetch("/api/dusun"),
+        fetch("/api/ulasan"),
       ]);
       const umkmResult = await umkmRes.json();
       const dusunData = await dusunRes.json();
+      const ulasanResult = await ulasanRes.json();
       setUmkms(umkmResult.data || []);
       setDusuns(dusunData);
+      setUlasanList(ulasanResult.data || []);
     } catch (error) {
       toast.error("Gagal mengambil data");
     } finally {
@@ -159,6 +165,45 @@ export default function AdminPage() {
       toast.error("Terjadi kesalahan");
     } finally {
       setUpdatingStatusId(null);
+    }
+  };
+
+  const [updatingUlasanId, setUpdatingUlasanId] = useState<string | null>(null);
+
+  const handleUlasanStatusChange = async (id: string, status: "APPROVED" | "REJECTED") => {
+    setUpdatingUlasanId(id);
+    try {
+      const res = await fetch(`/api/ulasan/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setUlasanList(ulasanList.map(u => (u.id === id ? { ...u, status: updated.status } : u)));
+        toast.success(status === "APPROVED" ? "Ulasan disetujui" : "Ulasan ditolak");
+      } else {
+        toast.error("Gagal mengubah status ulasan");
+      }
+    } catch (error) {
+      toast.error("Terjadi kesalahan");
+    } finally {
+      setUpdatingUlasanId(null);
+    }
+  };
+
+  const handleDeleteUlasan = async (id: string) => {
+    if (!confirm("Yakin ingin menghapus ulasan ini?")) return;
+    try {
+      const res = await fetch(`/api/ulasan/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Ulasan dihapus");
+        setUlasanList(ulasanList.filter(u => u.id !== id));
+      } else {
+        toast.error("Gagal menghapus ulasan");
+      }
+    } catch (error) {
+      toast.error("Terjadi kesalahan");
     }
   };
 
@@ -626,6 +671,112 @@ export default function AdminPage() {
               <Pagination page={umkmPage} totalPages={umkmTotalPages} onPageChange={setUmkmPage} />
             </div>
           )}
+        </div>
+
+        {/* Ulasan Table */}
+        <div className="bg-white rounded-3xl shadow-sm border overflow-hidden mt-10">
+          <div className="p-6 border-b flex items-center justify-between bg-white flex-wrap gap-2">
+            <h2 className="text-xl font-bold text-foreground">Moderasi Rating & Ulasan</h2>
+            {ulasanList.filter(u => u.status === "PENDING").length > 0 && (
+              <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-semibold">
+                {ulasanList.filter(u => u.status === "PENDING").length} menunggu persetujuan
+              </span>
+            )}
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs text-muted-foreground uppercase bg-secondary/50">
+                <tr>
+                  <th className="px-6 py-4 font-semibold">UMKM</th>
+                  <th className="px-6 py-4 font-semibold">Pengulas</th>
+                  <th className="px-6 py-4 font-semibold">Rating</th>
+                  <th className="px-6 py-4 font-semibold">Ulasan</th>
+                  <th className="px-6 py-4 font-semibold">Status</th>
+                  <th className="px-6 py-4 font-semibold text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                      <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
+                      Memuat data...
+                    </td>
+                  </tr>
+                ) : ulasanList.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                      Belum ada ulasan masuk
+                    </td>
+                  </tr>
+                ) : (
+                  ulasanList.map((u) => (
+                    <tr key={u.id} className="border-b border-border/50 hover:bg-secondary/20 transition-colors align-top">
+                      <td className="px-6 py-4 font-medium text-foreground whitespace-nowrap">{u.umkm?.nama}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{u.nama}</td>
+                      <td className="px-6 py-4">
+                        <StarDisplay rating={u.rating} size={14} />
+                      </td>
+                      <td className="px-6 py-4 max-w-xs">
+                        <p className="line-clamp-2">{u.teks}</p>
+                        {u.foto && (
+                          <div className="relative w-12 h-12 rounded-lg overflow-hidden border mt-1.5">
+                            <Image src={u.foto} alt="Foto ulasan" fill className="object-cover" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {u.status === "APPROVED" && (
+                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-md text-xs font-semibold">Disetujui</span>
+                        )}
+                        {u.status === "PENDING" && (
+                          <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-md text-xs font-semibold">Menunggu</span>
+                        )}
+                        {u.status === "REJECTED" && (
+                          <span className="bg-red-100 text-red-800 px-2 py-1 rounded-md text-xs font-semibold">Ditolak</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end flex-wrap gap-1">
+                          {u.status !== "APPROVED" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={updatingUlasanId === u.id}
+                              onClick={() => handleUlasanStatusChange(u.id, "APPROVED")}
+                              className="text-green-700 hover:bg-green-100 transition-colors"
+                            >
+                              {updatingUlasanId === u.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 mr-1" />} Setujui
+                            </Button>
+                          )}
+                          {u.status !== "REJECTED" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={updatingUlasanId === u.id}
+                              onClick={() => handleUlasanStatusChange(u.id, "REJECTED")}
+                              className="text-red-700 hover:bg-red-100 transition-colors"
+                            >
+                              <X className="w-4 h-4 mr-1" /> Tolak
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteUlasan(u.id)}
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4 mr-1.5" /> Hapus
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

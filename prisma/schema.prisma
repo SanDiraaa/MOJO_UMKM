@@ -39,6 +39,7 @@ model Umkm {
   dusunId        String
   dusun          Dusun        @relation(fields: [dusunId], references: [id], onDelete: Cascade)
   fotoProduk     FotoProduk[]
+  ulasan         Ulasan[]
 }
 
 model FotoProduk {
@@ -46,4 +47,22 @@ model FotoProduk {
   url    String
   umkmId String
   umkm   Umkm   @relation(fields: [umkmId], references: [id], onDelete: Cascade)
+}
+
+enum UlasanStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Ulasan {
+  id        String       @id @default(cuid())
+  nama      String
+  rating    Int
+  teks      String
+  foto      String?
+  status    UlasanStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  umkmId    String
+  umkm      Umkm         @relation(fields: [umkmId], references: [id], onDelete: Cascade)
 }

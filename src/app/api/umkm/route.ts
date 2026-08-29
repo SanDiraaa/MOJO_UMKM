@@ -39,8 +39,28 @@ export async function GET(request: Request) {
       prisma.umkm.count({ where }),
     ]);
 
+    // Hitung rata-rata rating & jumlah ulasan (yang sudah disetujui) untuk tiap UMKM di halaman ini
+    const umkmIds = umkms.map((u: any) => u.id);
+    const ratingGroups = umkmIds.length
+      ? await prisma.ulasan.groupBy({
+          by: ["umkmId"],
+          where: { umkmId: { in: umkmIds }, status: "APPROVED" },
+          _avg: { rating: true },
+          _count: { rating: true },
+        })
+      : [];
+    const ratingMap = new Map<string, { avgRating: number; reviewCount: number }>(
+      ratingGroups.map((g: any) => [g.umkmId, { avgRating: g._avg.rating || 0, reviewCount: g._count.rating }])
+    );
+
+    const umkmsWithRating = umkms.map((u: any) => ({
+      ...u,
+      avgRating: Math.round((ratingMap.get(u.id)?.avgRating || 0) * 10) / 10,
+      reviewCount: ratingMap.get(u.id)?.reviewCount || 0,
+    }));
+
     return NextResponse.json({
-      data: umkms,
+      data: umkmsWithRating,
       total,
       page,
       pageSize,

@@ -26,7 +26,13 @@ async function getDusuns() {
     include: {
       _count: {
         select: { umkms: { where: { status: "APPROVED" } } }
-      }
+      },
+      umkms: {
+        where: { status: "APPROVED" },
+        select: { id: true, nama: true, fotoUtama: true },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      },
     },
     orderBy: {
       nama: 'asc'

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { MapPin, User, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { StarDisplay } from "@/components/StarRating";
 
 interface UmkmCardProps {
   umkm: {
@@ -13,6 +14,8 @@ interface UmkmCardProps {
     alamat: string;
     mapsUrl?: string | null;
     fotoUtama: string;
+    avgRating?: number;
+    reviewCount?: number;
   };
 }
 
@@ -43,6 +46,15 @@ export default function UmkmCard({ umkm }: UmkmCardProps) {
         <h3 className="text-xl font-display font-bold text-foreground mb-1 line-clamp-1 group-hover:text-primary transition-colors">
           {umkm.nama}
         </h3>
+
+        {umkm.reviewCount ? (
+          <div className="flex items-center gap-1.5 mb-2">
+            <StarDisplay rating={umkm.avgRating || 0} size={14} />
+            <span className="text-xs text-muted-foreground">{umkm.avgRating} ({umkm.reviewCount})</span>
+          </div>
+        ) : (
+          <div className="mb-2" />
+        )}
         
         <div className="flex items-center text-sm text-muted-foreground mb-4">
           <User className="w-4 h-4 mr-1.5 shrink-0" />

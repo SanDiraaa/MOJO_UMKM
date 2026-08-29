@@ -3,6 +3,7 @@ import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PhotoGallery from "@/components/PhotoGallery";
+import UlasanSection from "@/components/UlasanSection";
 import { PrismaClient } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { isAdminRequest } from "@/lib/auth";
@@ -151,6 +152,11 @@ export default async function UmkmDetailPage({
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Rating & Ulasan */}
+          <div className="max-w-4xl mx-auto mt-8">
+            <UlasanSection umkmId={umkm.id} />
           </div>
         </div>
       </main>
