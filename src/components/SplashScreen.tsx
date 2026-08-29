@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { Store, MousePointerClick } from "lucide-react";
 
 const SESSION_KEY = "mojo_splash_seen";
@@ -43,10 +44,21 @@ export default function SplashScreen() {
   return (
     <div
       onClick={dismiss}
-      className={`fixed inset-0 z-[200] bg-primary flex flex-col items-center justify-center cursor-pointer select-none transition-opacity duration-[400ms] ${
+      className={`fixed inset-0 z-[200] bg-primary flex flex-col items-center justify-center cursor-pointer select-none transition-opacity duration-[400ms] overflow-hidden ${
         status === "fading" ? "opacity-0" : "opacity-100"
       }`}
     >
+      {/* Foto Balai Desa Mojolebak sebagai latar belakang samar */}
+      <div className="absolute inset-x-0 bottom-0 h-[55%] sm:h-[65%] pointer-events-none select-none" aria-hidden="true">
+        <Image
+          src="/images/balai-desa.png"
+          alt=""
+          fill
+          className="object-contain object-bottom opacity-[0.16] mix-blend-luminosity"
+          priority
+        />
+      </div>
+
       {/* Motif dekoratif ringan */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 w-full h-full">
@@ -58,6 +70,15 @@ export default function SplashScreen() {
             opacity="0.06"
           />
         </svg>
+      </div>
+
+      {/* Logo instansi pendukung */}
+      <div className="relative flex items-center gap-3 bg-white/95 rounded-full px-4 py-2 mb-8 shadow-lg animate-in fade-in zoom-in-95 duration-500">
+        <Image src="/logos/logo-umg.png" alt="Logo Universitas Muhammadiyah Gresik" width={78} height={20} className="h-5 w-auto object-contain" />
+        <span className="w-px h-5 bg-border" />
+        <Image src="/logos/logo-kkn.png" alt="Logo KKN Kelompok 10" width={26} height={26} className="h-[26px] w-[26px] object-contain rounded-full" />
+        <span className="w-px h-5 bg-border" />
+        <Image src="/logos/logo-desa.png" alt="Logo Pemerintah Desa Mojolebak" width={22} height={28} className="h-7 w-auto object-contain" />
       </div>
 
       <div className="relative flex flex-col items-center text-center px-6 animate-in fade-in zoom-in-95 duration-500">
