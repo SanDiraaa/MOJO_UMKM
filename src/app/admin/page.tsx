@@ -6,6 +6,7 @@ import { Trash2, Loader2, Store, Users, Map as MapIcon, LogOut, Pencil, Check, X
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import Pagination from "@/components/Pagination";
 import {
@@ -34,7 +35,7 @@ export default function AdminPage() {
   const [savingDusun, setSavingDusun] = useState(false);
 
   const [editingUmkm, setEditingUmkm] = useState<any | null>(null);
-  const [umkmForm, setUmkmForm] = useState({ nama: "", pemilik: "", kategori: "", dusunId: "", alamat: "", mapsUrl: "", whatsapp: "" });
+  const [umkmForm, setUmkmForm] = useState({ nama: "", pemilik: "", kategori: "", dusunId: "", alamat: "", mapsUrl: "", whatsapp: "", deskripsi: "" });
   const [savingUmkm, setSavingUmkm] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -210,12 +211,13 @@ export default function AdminPage() {
       alamat: umkm.alamat || "",
       mapsUrl: umkm.mapsUrl || "",
       whatsapp: umkm.whatsapp || "",
+      deskripsi: umkm.deskripsi || "",
     });
   };
 
   const closeEditUmkm = () => {
     setEditingUmkm(null);
-    setUmkmForm({ nama: "", pemilik: "", kategori: "", dusunId: "", alamat: "", mapsUrl: "", whatsapp: "" });
+    setUmkmForm({ nama: "", pemilik: "", kategori: "", dusunId: "", alamat: "", mapsUrl: "", whatsapp: "", deskripsi: "" });
   };
 
   const saveUmkm = async () => {
@@ -679,6 +681,17 @@ export default function AdminPage() {
                   onChange={e => setUmkmForm({ ...umkmForm, alamat: e.target.value })}
                   placeholder="Contoh: Jl. Mawar No. 12, Dusun Mojo"
                   className="rounded-lg"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="umkm-deskripsi">Deskripsi</Label>
+                <Textarea
+                  id="umkm-deskripsi"
+                  value={umkmForm.deskripsi}
+                  onChange={e => setUmkmForm({ ...umkmForm, deskripsi: e.target.value })}
+                  placeholder="Ceritakan singkat tentang usaha dan produk yang dijual..."
+                  className="rounded-lg min-h-[100px] resize-none"
                 />
               </div>
 

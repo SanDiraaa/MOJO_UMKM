@@ -58,6 +58,8 @@ function extractSearchTerm(input: string): string {
   return words.join(" ").trim();
 }
 
+const BUBBLE_MARGIN = 8;
+
 export default function AssistantWidget() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -65,6 +67,99 @@ export default function AssistantWidget() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // --- Drag-to-move untuk bubble chat ---
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const draggingRef = useRef(false);
+  const draggedRef = useRef(false);
+  const dragInfoRef = useRef({ startX: 0, startY: 0, origX: 0, origY: 0, width: 56, height: 56 });
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("mojo_bubble_pos");
+      if (saved) setPosition(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      setPosition((prev) => (prev ? clampToViewport(prev, dragInfoRef.current.width, dragInfoRef.current.height) : prev));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  function clampToViewport(pos: { x: number; y: number }, width: number, height: number) {
+    const maxX = window.innerWidth - width - BUBBLE_MARGIN;
+    const maxY = window.innerHeight - height - BUBBLE_MARGIN;
+    return { x: Math.min(Math.max(BUBBLE_MARGIN, pos.x), Math.max(BUBBLE_MARGIN, maxX)), y: Math.min(Math.max(BUBBLE_MARGIN, pos.y), Math.max(BUBBLE_MARGIN, maxY)) };
+  }
+
+  function handlePointerDown(e: React.PointerEvent<HTMLButtonElement>) {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    draggingRef.current = true;
+    draggedRef.current = false;
+    dragInfoRef.current = { startX: e.clientX, startY: e.clientY, origX: rect.left, origY: rect.top, width: rect.width, height: rect.height };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLButtonElement>) {
+    if (!draggingRef.current) return;
+    const { startX, startY, origX, origY, width, height } = dragInfoRef.current;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) draggedRef.current = true;
+    if (draggedRef.current) {
+      setPosition(clampToViewport({ x: origX + dx, y: origY + dy }, width, height));
+    }
+  }
+
+  function handlePointerUp() {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    if (draggedRef.current) {
+      setPosition((prev) => {
+        if (!prev) return prev;
+        // Menempel otomatis ke tepi kiri/kanan terdekat
+        const { width, height } = dragInfoRef.current;
+        const snapX = prev.x + width / 2 < window.innerWidth / 2 ? BUBBLE_MARGIN : window.innerWidth - width - BUBBLE_MARGIN;
+        const snapped = clampToViewport({ x: snapX, y: prev.y }, width, height);
+        try {
+          sessionStorage.setItem("mojo_bubble_pos", JSON.stringify(snapped));
+        } catch {}
+        return snapped;
+      });
+    }
+  }
+
+  function handleButtonClick() {
+    if (draggedRef.current) {
+      draggedRef.current = false;
+      return;
+    }
+    setOpen((v) => !v);
+  }
+
+  function getPanelStyle(): React.CSSProperties {
+    if (!position) return { position: "fixed", bottom: "96px", right: "20px" };
+    const { width, height } = dragInfoRef.current;
+    const centerX = position.x + width / 2;
+    const centerY = position.y + height / 2;
+    const style: React.CSSProperties = { position: "fixed" };
+    if (centerY > window.innerHeight / 2) {
+      style.bottom = window.innerHeight - position.y + 12;
+    } else {
+      style.top = position.y + height + 12;
+    }
+    if (centerX < window.innerWidth / 2) {
+      style.left = position.x;
+    } else {
+      style.right = window.innerWidth - (position.x + width);
+    }
+    return style;
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -180,11 +275,17 @@ export default function AssistantWidget() {
 
   return (
     <>
-      {/* Tombol mengambang */}
+      {/* Tombol mengambang \u2014 bisa digeser (drag) */}
       <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Tutup asisten" : "Chat dengan Mas Lucky"}
-        className={`fixed bottom-5 right-5 z-40 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:scale-105 flex items-center ${
+        ref={buttonRef}
+        onClick={handleButtonClick}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        aria-label={open ? "Tutup asisten" : "Chat dengan Mas Lucky (bisa digeser)"}
+        style={position ? { position: "fixed", left: position.x, top: position.y, right: "auto", bottom: "auto" } : undefined}
+        className={`${position ? "" : "fixed bottom-5 right-5"} z-40 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 flex items-center touch-none cursor-grab active:cursor-grabbing select-none ${
           open ? "rounded-t-full rounded-b-2xl w-14 h-14 justify-center" : "rounded-full h-14 pl-4 pr-5 gap-2"
         }`}
       >
@@ -205,7 +306,7 @@ export default function AssistantWidget() {
 
       {/* Panel chat */}
       {open && (
-        <div className="fixed bottom-24 right-5 z-40 w-[calc(100vw-2.5rem)] max-w-sm bg-white rounded-2xl shadow-2xl border flex flex-col overflow-hidden" style={{ height: "min(70vh, 560px)" }}>
+        <div className="z-40 w-[calc(100vw-2.5rem)] max-w-sm bg-white rounded-2xl shadow-2xl border flex flex-col overflow-hidden" style={{ ...getPanelStyle(), height: "min(70vh, 560px)" }}>
           <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center gap-2">
             <div className="bg-white/20 rounded-full p-1.5">
               <Store className="w-4 h-4" />

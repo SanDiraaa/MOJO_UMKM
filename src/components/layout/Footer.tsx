@@ -49,7 +49,6 @@ export default function Footer() {
         
         <div className="border-t mt-12 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} KKN Kelompok 10 UMG. Hak cipta dilindungi.</p>
-          <p className="mt-2 md:mt-0">Dibuat dengan ❤️ untuk kemajuan desa</p>
         </div>
       </div>
     </footer>

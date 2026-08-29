@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { Store, Menu, X, Home, Search, ClipboardList, BookOpen } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Store, Menu, X, Home, Search, ClipboardList, BookOpen, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
@@ -17,6 +17,8 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const showBackButton = pathname !== "/";
 
   return (
     <header className="sticky top-0 z-50">
@@ -35,14 +37,25 @@ export default function Navbar() {
       {/* Bar navigasi utama */}
       <nav className="bg-white/90 backdrop-blur-md border-b border-border/40 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 group shrink-0" onClick={() => setMenuOpen(false)}>
-            <div className="bg-primary p-2 rounded-t-full rounded-b-md group-hover:bg-primary/90 transition-colors">
-              <Store className="h-5 w-5 text-white" />
-            </div>
-            <span className="font-display font-bold text-lg sm:text-xl text-foreground tracking-tight whitespace-nowrap">
-              UMKM <span className="text-primary">Mojolebak</span>
-            </span>
-          </Link>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {showBackButton && (
+              <button
+                onClick={() => router.back()}
+                aria-label="Kembali ke halaman sebelumnya"
+                className="flex items-center justify-center h-9 w-9 rounded-full text-muted-foreground hover:text-primary hover:bg-secondary/60 transition-colors shrink-0"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+            )}
+            <Link href="/" className="flex items-center gap-2 group" onClick={() => setMenuOpen(false)}>
+              <div className="bg-primary p-2 rounded-t-full rounded-b-md group-hover:bg-primary/90 transition-colors">
+                <Store className="h-5 w-5 text-white" />
+              </div>
+              <span className="font-display font-bold text-lg sm:text-xl text-foreground tracking-tight whitespace-nowrap">
+                UMKM <span className="text-primary">Mojolebak</span>
+              </span>
+            </Link>
+          </div>
 
           <div className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map((link) => {
