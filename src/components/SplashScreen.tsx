@@ -48,13 +48,13 @@ export default function SplashScreen() {
         status === "fading" ? "opacity-0" : "opacity-100"
       }`}
     >
-      {/* Foto Balai Desa Mojolebak sebagai latar belakang samar */}
-      <div className="absolute inset-x-0 bottom-0 h-[55%] sm:h-[65%] pointer-events-none select-none" aria-hidden="true">
+      {/* Foto Balai Desa Mojolebak sebagai latar belakang */}
+      <div className="absolute inset-x-0 bottom-0 h-[78%] sm:h-[90%] pointer-events-none select-none" aria-hidden="true">
         <Image
           src="/images/balai-desa.png"
           alt=""
           fill
-          className="object-contain object-bottom opacity-[0.16] mix-blend-luminosity"
+          className="object-contain object-bottom opacity-[0.32] mix-blend-luminosity"
           priority
         />
       </div>
@@ -72,8 +72,8 @@ export default function SplashScreen() {
         </svg>
       </div>
 
-      {/* Logo instansi pendukung */}
-      <div className="relative flex items-center gap-3 bg-white/95 rounded-full px-4 py-2 mb-8 shadow-lg animate-in fade-in zoom-in-95 duration-500">
+      {/* Logo instansi pendukung — ditempatkan di paling atas */}
+      <div className="absolute top-5 sm:top-8 flex items-center gap-3 bg-white/95 rounded-full px-4 py-2 shadow-lg animate-in fade-in zoom-in-95 duration-500">
         <Image src="/logos/logo-umg.png" alt="Logo Universitas Muhammadiyah Gresik" width={78} height={20} className="h-5 w-auto object-contain" />
         <span className="w-px h-5 bg-border" />
         <Image src="/logos/logo-kkn.png" alt="Logo KKN Kelompok 10" width={26} height={26} className="h-[26px] w-[26px] object-contain rounded-full" />
