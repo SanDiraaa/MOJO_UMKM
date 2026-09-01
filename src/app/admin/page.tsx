@@ -141,9 +141,19 @@ export default function AdminPage() {
   const [umkmPage, setUmkmPage] = useState(1);
   const UMKM_PAGE_SIZE = 10;
 
+  const [ulasanSearch, setUlasanSearch] = useState("");
+  const [ulasanUmkmFilter, setUlasanUmkmFilter] = useState("Semua");
+  const [ulasanRatingFilter, setUlasanRatingFilter] = useState("Semua");
+  const [ulasanPage, setUlasanPage] = useState(1);
+  const ULASAN_PAGE_SIZE = 10;
+
   useEffect(() => {
     setUmkmPage(1);
   }, [umkmSearch, umkmStatusFilter, umkmDusunFilter]);
+
+  useEffect(() => {
+    setUlasanPage(1);
+  }, [ulasanSearch, ulasanUmkmFilter, ulasanRatingFilter]);
 
   const handleStatusChange = async (id: string, status: "APPROVED" | "REJECTED" | "PENDING") => {
     setUpdatingStatusId(id);
@@ -165,30 +175,6 @@ export default function AdminPage() {
       toast.error("Terjadi kesalahan");
     } finally {
       setUpdatingStatusId(null);
-    }
-  };
-
-  const [updatingUlasanId, setUpdatingUlasanId] = useState<string | null>(null);
-
-  const handleUlasanStatusChange = async (id: string, status: "APPROVED" | "REJECTED") => {
-    setUpdatingUlasanId(id);
-    try {
-      const res = await fetch(`/api/ulasan/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setUlasanList(ulasanList.map(u => (u.id === id ? { ...u, status: updated.status } : u)));
-        toast.success(status === "APPROVED" ? "Ulasan disetujui" : "Ulasan ditolak");
-      } else {
-        toast.error("Gagal mengubah status ulasan");
-      }
-    } catch (error) {
-      toast.error("Terjadi kesalahan");
-    } finally {
-      setUpdatingUlasanId(null);
     }
   };
 
@@ -368,6 +354,17 @@ export default function AdminPage() {
   });
   const umkmTotalPages = Math.max(1, Math.ceil(filteredUmkms.length / UMKM_PAGE_SIZE));
   const paginatedUmkms = filteredUmkms.slice((umkmPage - 1) * UMKM_PAGE_SIZE, umkmPage * UMKM_PAGE_SIZE);
+
+  const filteredUlasan = ulasanList.filter(u => {
+    const matchSearch = u.nama.toLowerCase().includes(ulasanSearch.toLowerCase()) ||
+      u.teks.toLowerCase().includes(ulasanSearch.toLowerCase()) ||
+      (u.umkm?.nama || "").toLowerCase().includes(ulasanSearch.toLowerCase());
+    const matchUmkm = ulasanUmkmFilter === "Semua" || u.umkmId === ulasanUmkmFilter;
+    const matchRating = ulasanRatingFilter === "Semua" || u.rating === Number(ulasanRatingFilter);
+    return matchSearch && matchUmkm && matchRating;
+  });
+  const ulasanTotalPages = Math.max(1, Math.ceil(filteredUlasan.length / ULASAN_PAGE_SIZE));
+  const paginatedUlasan = filteredUlasan.slice((ulasanPage - 1) * ULASAN_PAGE_SIZE, ulasanPage * ULASAN_PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-secondary/10 flex flex-col">
@@ -675,13 +672,42 @@ export default function AdminPage() {
 
         {/* Ulasan Table */}
         <div className="bg-white rounded-3xl shadow-sm border overflow-hidden mt-10">
-          <div className="p-6 border-b flex items-center justify-between bg-white flex-wrap gap-2">
-            <h2 className="text-xl font-bold text-foreground">Moderasi Rating & Ulasan</h2>
-            {ulasanList.filter(u => u.status === "PENDING").length > 0 && (
-              <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-semibold">
-                {ulasanList.filter(u => u.status === "PENDING").length} menunggu persetujuan
-              </span>
-            )}
+          <div className="p-6 border-b bg-white space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="text-xl font-bold text-foreground">Rating & Ulasan</h2>
+              <span className="text-xs text-muted-foreground">{ulasanList.length} ulasan total</span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Input
+                placeholder="Cari nama pengulas, isi ulasan, atau nama UMKM..."
+                value={ulasanSearch}
+                onChange={e => setUlasanSearch(e.target.value)}
+                className="rounded-lg sm:max-w-xs"
+              />
+              <Select value={ulasanUmkmFilter} onValueChange={setUlasanUmkmFilter}>
+                <SelectTrigger className="rounded-lg w-full sm:w-56">
+                  <SelectValue placeholder="Semua UMKM" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Semua">Semua UMKM</SelectItem>
+                  {umkms.map(u => (
+                    <SelectItem key={u.id} value={u.id}>{u.nama}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={ulasanRatingFilter} onValueChange={setUlasanRatingFilter}>
+                <SelectTrigger className="rounded-lg w-full sm:w-40">
+                  <SelectValue placeholder="Semua Rating" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Semua">Semua Rating</SelectItem>
+                  {[5, 4, 3, 2, 1].map(r => (
+                    <SelectItem key={r} value={String(r)}>{r} Bintang</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -692,26 +718,25 @@ export default function AdminPage() {
                   <th className="px-6 py-4 font-semibold">Pengulas</th>
                   <th className="px-6 py-4 font-semibold">Rating</th>
                   <th className="px-6 py-4 font-semibold">Ulasan</th>
-                  <th className="px-6 py-4 font-semibold">Status</th>
                   <th className="px-6 py-4 font-semibold text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
                       <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
                       Memuat data...
                     </td>
                   </tr>
-                ) : ulasanList.length === 0 ? (
+                ) : filteredUlasan.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
-                      Belum ada ulasan masuk
+                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                      {ulasanList.length === 0 ? "Belum ada ulasan masuk" : "Tidak ada ulasan yang cocok dengan pencarian/filter"}
                     </td>
                   </tr>
                 ) : (
-                  ulasanList.map((u) => (
+                  paginatedUlasan.map((u) => (
                     <tr key={u.id} className="border-b border-border/50 hover:bg-secondary/20 transition-colors align-top">
                       <td className="px-6 py-4 font-medium text-foreground whitespace-nowrap">{u.umkm?.nama}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{u.nama}</td>
@@ -726,50 +751,15 @@ export default function AdminPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4">
-                        {u.status === "APPROVED" && (
-                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-md text-xs font-semibold">Disetujui</span>
-                        )}
-                        {u.status === "PENDING" && (
-                          <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-md text-xs font-semibold">Menunggu</span>
-                        )}
-                        {u.status === "REJECTED" && (
-                          <span className="bg-red-100 text-red-800 px-2 py-1 rounded-md text-xs font-semibold">Ditolak</span>
-                        )}
-                      </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end flex-wrap gap-1">
-                          {u.status !== "APPROVED" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              disabled={updatingUlasanId === u.id}
-                              onClick={() => handleUlasanStatusChange(u.id, "APPROVED")}
-                              className="text-green-700 hover:bg-green-100 transition-colors"
-                            >
-                              {updatingUlasanId === u.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 mr-1" />} Setujui
-                            </Button>
-                          )}
-                          {u.status !== "REJECTED" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              disabled={updatingUlasanId === u.id}
-                              onClick={() => handleUlasanStatusChange(u.id, "REJECTED")}
-                              className="text-red-700 hover:bg-red-100 transition-colors"
-                            >
-                              <X className="w-4 h-4 mr-1" /> Tolak
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteUlasan(u.id)}
-                            className="text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4 mr-1.5" /> Hapus
-                          </Button>
-                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteUlasan(u.id)}
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1.5" /> Hapus
+                        </Button>
                       </td>
                     </tr>
                   ))
@@ -777,6 +767,14 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
+          {!loading && filteredUlasan.length > 0 && (
+            <div className="px-6 pb-6">
+              <p className="text-xs text-muted-foreground text-center mb-2">
+                Menampilkan {paginatedUlasan.length} dari {filteredUlasan.length} ulasan
+              </p>
+              <Pagination page={ulasanPage} totalPages={ulasanTotalPages} onPageChange={setUlasanPage} />
+            </div>
+          )}
         </div>
       </div>
 

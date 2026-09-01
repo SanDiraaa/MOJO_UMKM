@@ -91,7 +91,8 @@ export default function UlasanSection({ umkmId }: { umkmId: string }) {
       setRating(0);
       setTeks("");
       setFotoUrl(null);
-      toast.success("Ulasan berhasil dikirim!", { description: "Akan tampil setelah ditinjau admin." });
+      toast.success("Ulasan berhasil dikirim! Terima kasih atas ulasan Anda.");
+      fetchUlasan();
     } catch {
       toast.error("Gagal mengirim ulasan. Coba lagi.");
     } finally {
@@ -148,8 +149,15 @@ export default function UlasanSection({ umkmId }: { umkmId: string }) {
         <h3 className="font-display font-bold text-foreground mb-4">Tulis Ulasan Anda</h3>
 
         {submitted ? (
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm text-foreground">
-            Terima kasih! Ulasan Anda akan tampil setelah ditinjau admin.
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm text-foreground flex items-center justify-between flex-wrap gap-2">
+            <span>Terima kasih! Ulasan Anda sudah tayang di atas.</span>
+            <button
+              type="button"
+              onClick={() => setSubmitted(false)}
+              className="text-primary font-medium underline underline-offset-2 text-sm"
+            >
+              Tulis ulasan lagi
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">

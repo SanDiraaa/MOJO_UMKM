@@ -76,7 +76,7 @@ export async function POST(request: Request) {
         rating: ratingNum,
         teks: teks.trim(),
         foto: foto || null,
-        status: "PENDING",
+        status: "APPROVED",
       },
     });
 
