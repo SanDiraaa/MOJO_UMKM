@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Store, Menu, X, Home, Search, ClipboardList, BookOpen, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const NAV_LINKS = [
   { href: "/", label: "Beranda", icon: Home },
@@ -35,7 +36,7 @@ export default function Navbar() {
       </div>
 
       {/* Bar navigasi utama */}
-      <nav className="bg-white/90 backdrop-blur-md border-b border-border/40 shadow-sm">
+      <nav className="bg-background/90 backdrop-blur-md border-b border-border/40 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-1.5 shrink-0">
             {showBackButton && (
@@ -77,13 +78,15 @@ export default function Navbar() {
             })}
           </div>
 
-          <div className="hidden md:block shrink-0">
+          <div className="hidden md:flex items-center gap-2 shrink-0">
+            <ThemeToggle />
             <Button asChild className="rounded-full shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all hover:-translate-y-0.5">
               <Link href="/admin">Login Admin</Link>
             </Button>
           </div>
 
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center gap-1">
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="icon"
@@ -97,7 +100,7 @@ export default function Navbar() {
         </div>
 
         {menuOpen && (
-          <div className="md:hidden border-t border-border/40 bg-white px-4 py-4 flex flex-col gap-1 shadow-sm">
+          <div className="md:hidden border-t border-border/40 bg-background px-4 py-4 flex flex-col gap-1 shadow-sm">
             {NAV_LINKS.map((link) => {
               const isActive = link.href === "/" ? pathname === "/" : pathname?.startsWith(link.href);
               return (

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import AssistantWidget from "@/components/AssistantWidget";
 import SplashScreen from "@/components/SplashScreen";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -36,12 +37,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" suppressHydrationWarning>
       <body className={`${poppins.variable} ${bitter.variable} font-sans antialiased bg-secondary/20 min-h-screen flex flex-col`}>
-        {children}
-        <SplashScreen />
-        <AssistantWidget />
-        <Toaster />
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+          <SplashScreen />
+          <AssistantWidget />
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
