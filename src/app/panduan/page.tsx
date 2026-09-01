@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -18,11 +21,6 @@ import {
   MessageCircle,
   Users,
 } from "lucide-react";
-
-export const metadata = {
-  title: "Panduan Penggunaan - UMKM Mojolebak",
-  description: "Panduan lengkap cara mendaftarkan usaha maupun menjelajahi katalog UMKM di platform UMKM Mojolebak.",
-};
 
 const stepsUmkm = [
   {
@@ -111,13 +109,17 @@ function StepList({ steps }: { steps: typeof stepsUmkm }) {
   );
 }
 
+type Tab = "umkm" | "pembeli";
+
 export default function PanduanPage() {
+  const [tab, setTab] = useState<Tab>("umkm");
+
   return (
     <>
       <Navbar />
       <main className="flex-grow bg-secondary/20">
         {/* Hero */}
-        <div className="bg-white border-b pt-16 pb-12">
+        <div className="bg-white border-b pt-16 pb-10">
           <div className="container mx-auto px-4 text-center max-w-2xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-primary font-medium text-sm mb-6">
               <BookOpen className="w-4 h-4" />
@@ -126,88 +128,81 @@ export default function PanduanPage() {
             <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
               Panduan Penggunaan Website UMKM Mojolebak
             </h1>
-            <p className="text-muted-foreground text-lg leading-relaxed">
-              Baik Anda pelaku UMKM yang ingin mendaftarkan usaha, maupun pengunjung yang ingin menjelajahi produk lokal desa — semua panduannya ada di sini.
+            <p className="text-muted-foreground text-lg leading-relaxed mb-8">
+              Pilih panduan sesuai kebutuhan Anda.
             </p>
 
-            {/* Navigasi cepat ke tiap bagian */}
-            <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
-              <a
-                href="#panduan-umkm"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
+            {/* Tab switcher */}
+            <div className="inline-flex bg-secondary rounded-full p-1.5 gap-1">
+              <button
+                onClick={() => setTab("umkm")}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-all ${
+                  tab === "umkm"
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
               >
-                <ClipboardList className="w-4 h-4" /> Panduan Pelaku UMKM
-              </a>
-              <a
-                href="#panduan-pembeli"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-foreground font-medium text-sm hover:bg-secondary/70 transition-colors"
+                <ClipboardList className="w-4 h-4" /> Pelaku UMKM
+              </button>
+              <button
+                onClick={() => setTab("pembeli")}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-all ${
+                  tab === "pembeli"
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
               >
-                <Users className="w-4 h-4" /> Panduan Pengunjung / Pembeli
-              </a>
+                <Users className="w-4 h-4" /> Pengunjung / Pembeli
+              </button>
             </div>
           </div>
         </div>
 
-        {/* ===== Panduan Pelaku UMKM ===== */}
-        <div id="panduan-umkm" className="container mx-auto px-4 py-14 max-w-3xl scroll-mt-20">
-          <div className="mb-8">
-            <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-2 mb-2">
-              <ClipboardList className="w-6 h-6 text-primary" /> Panduan untuk Pelaku UMKM
-            </h2>
-            <p className="text-muted-foreground">Langkah-langkah mendaftarkan dan mengelola usaha Anda di website ini.</p>
-          </div>
+        {/* Konten tab, dengan animasi slide setiap ganti tab */}
+        <div className="container mx-auto px-4 py-12 max-w-3xl overflow-hidden">
+          {tab === "umkm" ? (
+            <div key="umkm" className="animate-in fade-in slide-in-from-right-6 duration-300">
+              <StepList steps={stepsUmkm} />
 
-          <StepList steps={stepsUmkm} />
+              <div className="mt-10 bg-accent/15 border border-accent/30 rounded-2xl p-6">
+                <h3 className="font-display font-bold text-lg text-foreground mb-2 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-primary" /> Setelah Mendaftar
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Data usaha Anda <strong className="text-foreground">tidak langsung tampil ke publik</strong>. Admin desa akan meninjau pendaftaran terlebih dahulu untuk memastikan data valid. Setelah disetujui, usaha Anda otomatis muncul di Beranda, halaman dusun, dan bisa ditemukan lewat pencarian. Kalau setelah beberapa hari belum juga muncul, silakan hubungi admin desa.
+                </p>
+              </div>
 
-          {/* Setelah mendaftar */}
-          <div className="mt-10 bg-accent/15 border border-accent/30 rounded-2xl p-6">
-            <h3 className="font-display font-bold text-lg text-foreground mb-2 flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-primary" /> Setelah Mendaftar
-            </h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Data usaha Anda <strong className="text-foreground">tidak langsung tampil ke publik</strong>. Admin desa akan meninjau pendaftaran terlebih dahulu untuk memastikan data valid. Setelah disetujui, usaha Anda otomatis muncul di Beranda, halaman dusun, dan bisa ditemukan lewat pencarian. Kalau setelah beberapa hari belum juga muncul, silakan hubungi admin desa.
-            </p>
-          </div>
+              <div className="mt-6 bg-white border rounded-2xl p-6">
+                <h3 className="font-display font-bold text-lg text-foreground mb-2 flex items-center gap-2">
+                  <Pencil className="w-5 h-5 text-primary" /> Ingin Mengubah Data yang Sudah Terdaftar?
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Saat ini pelaku UMKM belum bisa mengedit sendiri data yang sudah didaftarkan. Kalau ada perubahan (nomor WhatsApp baru, jam operasional berubah, dll), silakan hubungi admin desa untuk dibantu memperbarui data Anda.
+                </p>
+              </div>
 
-          {/* Mengubah data */}
-          <div className="mt-6 bg-white border rounded-2xl p-6">
-            <h3 className="font-display font-bold text-lg text-foreground mb-2 flex items-center gap-2">
-              <Pencil className="w-5 h-5 text-primary" /> Ingin Mengubah Data yang Sudah Terdaftar?
-            </h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Saat ini pelaku UMKM belum bisa mengedit sendiri data yang sudah didaftarkan. Kalau ada perubahan (nomor WhatsApp baru, jam operasional berubah, dll), silakan hubungi admin desa untuk dibantu memperbarui data Anda.
-            </p>
-          </div>
-
-          <div className="mt-10 text-center">
-            <Button asChild size="lg" className="rounded-full h-14 px-8 shadow-md shadow-primary/20">
-              <Link href="/daftar">
-                Daftarkan UMKM Sekarang <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        {/* ===== Panduan Pembeli / Pengunjung ===== */}
-        <div id="panduan-pembeli" className="bg-white border-t">
-          <div className="container mx-auto px-4 py-14 max-w-3xl scroll-mt-20">
-            <div className="mb-8">
-              <h2 className="text-2xl font-display font-bold text-foreground flex items-center gap-2 mb-2">
-                <Users className="w-6 h-6 text-primary" /> Panduan untuk Pengunjung & Pembeli
-              </h2>
-              <p className="text-muted-foreground">Cara menjelajahi, mencari, dan berinteraksi dengan UMKM di website ini.</p>
+              <div className="mt-10 text-center">
+                <Button asChild size="lg" className="rounded-full h-14 px-8 shadow-md shadow-primary/20">
+                  <Link href="/daftar">
+                    Daftarkan UMKM Sekarang <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+              </div>
             </div>
+          ) : (
+            <div key="pembeli" className="animate-in fade-in slide-in-from-left-6 duration-300">
+              <StepList steps={stepsPembeli} />
 
-            <StepList steps={stepsPembeli} />
-
-            <div className="mt-10 text-center">
-              <Button asChild size="lg" variant="outline" className="rounded-full h-14 px-8">
-                <Link href="/cari">
-                  Mulai Jelajahi UMKM <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
+              <div className="mt-10 text-center">
+                <Button asChild size="lg" variant="outline" className="rounded-full h-14 px-8">
+                  <Link href="/cari">
+                    Mulai Jelajahi UMKM <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
       <Footer />
